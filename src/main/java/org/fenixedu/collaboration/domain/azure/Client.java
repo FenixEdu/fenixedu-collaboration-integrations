@@ -15,6 +15,11 @@ public class Client {
 
     private static String accessToken = null;
     private static LocalDateTime accessTokenValidUnit = LocalDateTime.now().minusSeconds(1);
+    private static String schoolId = CollaborationIntegrationsConfiguration.getConfiguration().organizationId();
+
+    public static void clearAccessToken() {
+        accessTokenValidUnit = LocalDateTime.now().minusSeconds(1);
+    }
 
     public static String getAccessToken() {
         final LocalDateTime now = LocalDateTime.now();
@@ -40,6 +45,18 @@ public class Client {
         return accessToken;
     }
 
+    public static JsonObject createSchool(final JsonObject body) {
+        final String url = "https://graph.microsoft.com/v1.0/education/schools";
+        final HttpResponse<String> response = Unirest.post(url)
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + Client.getAccessToken())
+                .body(body.toString())
+                .asString();
+        final JsonObject result = new JsonParser().parse(response.getBody()).getAsJsonObject();
+        schoolId = result.get("id").getAsString();
+        return result;
+    }
+
     public static void users(final Consumer<JsonObject> userConsumer) {
         users(userConsumer, null);
     }
@@ -60,6 +77,93 @@ public class Client {
         final String url = nextString == null ? "https://graph.microsoft.com/v1.0/users" : nextString;
         final GetRequest get = Unirest.get(url).header("Authorization", "Bearer " + Client.getAccessToken());
         return nextString == null ? get.queryString("$select", "id,userPrincipalName") : get;
+    }
+
+    public static JsonObject getEductionUser(final String userId) {
+        final HttpResponse<String> response = Unirest.get("https://graph.microsoft.com/v1.0/education/users/" + userId)
+                .header("Authorization", "Bearer " + Client.getAccessToken())
+                .asString();
+        return new JsonParser().parse(response.getBody()).getAsJsonObject();
+    }
+
+    public static JsonObject addUserToSchool(final String userId) {
+        final String url = "https://graph.microsoft.com/v1.0/education/schools/" + schoolId + "/users/$ref";
+        final JsonObject body = new JsonObject();
+        body.addProperty("@odata.id", "https://graph.microsoft.com/v1.0/education/users/" + userId);
+        final HttpResponse<String> response = Unirest.post(url)
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + Client.getAccessToken())
+                .body(body.toString())
+                .asString();
+        return new JsonParser().parse(response.getBody()).getAsJsonObject();
+    }
+
+    public static JsonObject createClass(final JsonObject body) {
+        final String url = "https://graph.microsoft.com/v1.0/education/classes";
+        final HttpResponse<String> response = Unirest.post(url)
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + Client.getAccessToken())
+                .body(body.toString())
+                .asString();
+        return new JsonParser().parse(response.getBody()).getAsJsonObject();
+    }
+
+    public static void addTeacher(final String classId, final String userId) {
+        final String url = "https://graph.microsoft.com/v1.0/education/classes/" + classId + "/teachers/$ref";
+        final JsonObject body = new JsonObject();
+        body.addProperty("@odata.id", "https://graph.microsoft.com/v1.0/education/users/" + userId);
+        final HttpResponse response = Unirest.post(url)
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + Client.getAccessToken())
+                .body(body.toString())
+                .asString();
+        if (response.getStatus() != 204) {
+            throw new Error("Error code: " + response.getStatus());
+        }
+    }
+
+    public static void removeTeacher(final String classId, final String userId) {
+        final String url = "https://graph.microsoft.com/v1.0/education/classes/" + classId + "/teachers/" + userId + "/$ref";
+        final HttpResponse response = Unirest.delete(url)
+                .header("Authorization", "Bearer " + Client.getAccessToken())
+                .asString();
+        if (response.getStatus() != 204) {
+            throw new Error("Error code: " + response.getStatus());
+        }
+    }
+
+    public static void addStudent(final String classId, final String userId) {
+        final String url = "https://graph.microsoft.com/v1.0/education/classes/" + classId + "/members/$ref";
+        final JsonObject body = new JsonObject();
+        body.addProperty("@odata.id", "https://graph.microsoft.com/v1.0/education/users/" + userId);
+        final HttpResponse response = Unirest.post(url)
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer " + Client.getAccessToken())
+                .body(body.toString())
+                .asString();
+        if (response.getStatus() != 204) {
+            throw new Error("Error code: " + response.getStatus());
+        }
+    }
+
+    public static void removeStudent(final String classId, final String userId) {
+        final String url = "https://graph.microsoft.com/v1.0/education/classes/" + classId + "/members/" + userId + "/$ref";
+        final HttpResponse response = Unirest.delete(url)
+                .header("Authorization", "Bearer " + Client.getAccessToken())
+                .asString();
+        if (response.getStatus() != 204) {
+            throw new Error("Error code: " + response.getStatus());
+        }
+    }
+
+    public static void deleteClass(final String classId) {
+        final String url = "https://graph.microsoft.com/v1.0/education/classes/" + classId;
+        final HttpResponse response = Unirest.delete(url)
+                .header("Authorization", "Bearer " + Client.getAccessToken())
+                .asString();
+        if (response.getStatus() != 204) {
+            throw new Error("Error code: " + response.getStatus());
+        }
     }
 
     public static JsonObject createGrouo(final String name, final String description, final Set<String> owners,
@@ -169,7 +273,7 @@ public class Client {
     }
 
     public static void removeMember(final String groupId, final String member) {
-        final String url = "https://graph.microsoft.com/v1.0/groups/" + groupId + "/members/" + owner +"/$ref";
+        final String url = "https://graph.microsoft.com/v1.0/groups/" + groupId + "/members/" + member +"/$ref";
         final HttpResponse response = Unirest.delete(url)
                 .header("Authorization", "Bearer " + Client.getAccessToken())
                 .asString();

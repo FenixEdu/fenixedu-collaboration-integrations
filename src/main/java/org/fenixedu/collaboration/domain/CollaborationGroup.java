@@ -25,21 +25,6 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         setName(groupName);
         add(getOwnersSet(), owners);
         add(getMembersSet(), members);
-        final JsonObject result = Client.createGrouo(groupName, groupDescription, getAzureIds(getOwnersSet()),
-                getAzureIds(getMembersSet()));
-        setAzureId(result.get("id").getAsString());
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(5000l);
-                } catch (final InterruptedException e) {
-                }
-                FenixFramework.atomic(() -> {
-                    updateMembers();
-                });
-            }
-        }.start();
     }
 
     private static Set<String> getAzureIds(final Set<Collaborator> collaborators) {
@@ -61,7 +46,27 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         final String groupName = CollaborationIntegrationsConfiguration.getConfiguration().organizationPrefix()
                 + "-" + Authenticate.getUser().getUsername().toUpperCase() + "-" + name.toUpperCase();
         final Set<User> owners = Stream.of(Authenticate.getUser()).collect(Collectors.toSet());
-        return new CollaborationGroup(groupName, description, owners, Collections.emptySet());
+        final CollaborationGroup group = new CollaborationGroup(groupName, description, owners, Collections.emptySet());
+        final JsonObject result = Client.createGrouo(groupName, description, getAzureIds(group.getOwnersSet()),
+                Collections.emptySet());
+        group.setAzureId(result.get("id").getAsString());
+        group.launchUpdateMembersThread();
+        return group;
+    }
+
+    private void launchUpdateMembersThread() {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(5000l);
+                } catch (final InterruptedException e) {
+                }
+                FenixFramework.atomic(() -> {
+                    updateMembers();
+                });
+            }
+        }.start();
     }
 
     @Atomic
@@ -77,6 +82,18 @@ public class CollaborationGroup extends CollaborationGroup_Base {
                 .collect(Collectors.toSet());
         final CollaborationGroup group = new CollaborationGroup(groupName, groupDescription, owners, members);
         group.setExecutionCourse(executionCourse);
+
+        final JsonObject body = new JsonObject();
+        body.addProperty("externalId", "IST" + executionCourse.getExternalId());
+        body.addProperty("description", groupDescription);
+        body.addProperty("classCode", groupName);
+        body.addProperty("displayName", executionCourse.getName());
+        body.addProperty("externalName", executionCourse.getName());
+        body.addProperty("externalSource", "FenixEdu@tecnico.ulisboa.pt");
+        body.addProperty("mailNickname", "tecnico.ulisboa.pt");
+        final JsonObject result = Client.createClass(body);
+        group.setAzureId(result.get("id").getAsString());
+        group.launchUpdateMembersThread();
         return group;
     }
 
@@ -144,28 +161,53 @@ public class CollaborationGroup extends CollaborationGroup_Base {
             final String id = jsonElement.getAsJsonObject().get("id").getAsString();
             owners.add(id);
             if (getOwnersSet().stream().noneMatch(c -> id.equals(c.getAzureId()))) {
-                Client.removeOwner(getAzureId(), id);
+                if (executionCourse == null) {
+                    Client.removeOwner(getAzureId(), id);
+                } else {
+                    Client.removeTeacher(getAzureId(), id);
+                }
             }
         }
         getOwnersSet().stream()
                 .filter(c -> !owners.contains(c.getAzureId()))
-                .forEach(c -> Client.addOwnerToGroup(getAzureUrl(), c.getAzureId()));
+                .forEach(c -> {
+                    if (executionCourse == null) {
+                        Client.addOwnerToGroup(getAzureUrl(), c.getAzureId());
+                    } else {
+                        Client.addTeacher(getAzureId(), c.getAzureId());
+                    }
+                });
 
         final Set<String> members = new HashSet<>();
         for (final JsonElement jsonElement : Client.listMembers(getAzureId()).get("value").getAsJsonArray()) {
             final String id = jsonElement.getAsJsonObject().get("id").getAsString();
             members.add(id);
             if (getMembersSet().stream().noneMatch(c -> id.equals(c.getAzureId()))) {
-                Client.removeMember(getAzureId(), id);
+                if (executionCourse == null) {
+                    Client.removeMember(getAzureId(), id);
+                } else {
+                    Client.removeStudent(getAzureId(), id);
+                }
             }
         }
         getMembersSet().stream()
                 .filter(c -> !members.contains(c.getAzureId()))
-                .forEach(c -> Client.addMemberToGroup(getAzureUrl(), c.getAzureId()));
+                .forEach(c -> {
+                    if (executionCourse == null) {
+                        Client.addMemberToGroup(getAzureUrl(), c.getAzureId());
+                    } else {
+                        Client.addStudent(getAzureId(), c.getAzureId());
+                    }
+                });
     }
 
     @Atomic
     public void delete() {
+        if (getExecutionCourse() == null) {
+            Client.deleteGroup(getAzureId());
+        } else {
+            Client.deleteClass(getAzureId());
+        }
         getOwnersSet().clear();
         getMembersSet().clear();
         setExecutionCourse(null);

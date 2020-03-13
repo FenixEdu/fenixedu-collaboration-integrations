@@ -19,6 +19,9 @@ public class CollaborationIntegrationsConfiguration {
         @ConfigurationProperty(key = "collaboration.azure.clientSecret", defaultValue = "clientSecret")
         public String clientSecret();
 
+        @ConfigurationProperty(key = "collaboration.azure.organization.id", defaultValue = "123")
+        public String organizationId();
+
         @ConfigurationProperty(key = "collaboration.azure.organization.prefix", defaultValue = "XPTO")
         public String organizationPrefix();
 
