@@ -203,10 +203,14 @@ public class CollaborationGroup extends CollaborationGroup_Base {
 
     @Atomic
     public void delete() {
-        if (getExecutionCourse() == null) {
-            Client.deleteGroup(getAzureId());
-        } else {
-            Client.deleteClass(getAzureId());
+        try {
+            if (getExecutionCourse() == null) {
+                Client.deleteGroup(getAzureId());
+            } else {
+                Client.deleteClass(getAzureId());
+            }
+        } catch (Throwable t) {
+            System.out.println("Unable to delete remote group: " + getAzureId() + " for domain object " + getExternalId());
         }
         getOwnersSet().clear();
         getMembersSet().clear();
