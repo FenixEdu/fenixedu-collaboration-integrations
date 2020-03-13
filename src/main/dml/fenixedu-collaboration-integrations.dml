@@ -1,0 +1,47 @@
+package org.fenixedu.collaboration.domain;
+
+class Collaborator {
+    String azureId;
+}
+
+class CollaborationGroup {
+    String name;
+    String azureId;
+    String azureUrl;
+}
+
+relation CollaboratorUser {
+	Collaborator playsRole collaborator {
+	    multiplicity 0..1;
+    }
+	.org.fenixedu.bennu.core.domain.User playsRole user {
+	    multiplicity 1..1;
+    }
+}
+
+relation CollaborationGroupOwners {
+	Collaborator playsRole owners {
+	    multiplicity *;
+    }
+	CollaborationGroup playsRole ownedGroup {
+	    multiplicity *;
+    }
+}
+
+relation CollaborationGroupMembers {
+	Collaborator playsRole members {
+	    multiplicity *;
+    }
+	CollaborationGroup playsRole memberGroup {
+	    multiplicity *;
+    }
+}
+
+relation CollaborationGroupExecutionCourse {
+	.org.fenixedu.academic.domain.ExecutionCourse playsRole executionCourse {
+	    multiplicity 0..1;
+    }
+	CollaborationGroup playsRole collaborationGroup {
+	    multiplicity 0..1;
+    }
+}
