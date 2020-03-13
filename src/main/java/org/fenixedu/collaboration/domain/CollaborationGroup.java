@@ -90,7 +90,7 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         body.addProperty("displayName", executionCourse.getName());
         body.addProperty("externalName", executionCourse.getName());
         body.addProperty("externalSource", "FenixEdu@tecnico.ulisboa.pt");
-        body.addProperty("mailNickname", "tecnico.ulisboa.pt");
+        body.addProperty("mailNickname", groupName);
         final JsonObject result = Client.createClass(body);
         group.setAzureId(result.get("id").getAsString());
         group.launchUpdateMembersThread();
