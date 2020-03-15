@@ -1,5 +1,6 @@
 package org.fenixedu.collaboration.domain;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.fenixedu.academic.domain.ExecutionCourse;
@@ -157,7 +158,9 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         }
 
         final Set<String> owners = new HashSet<>();
-        for (final JsonElement jsonElement : Client.listOwners(getAzureId()).get("value").getAsJsonArray()) {
+        final JsonObject ownerObject = executionCourse == null ? Client.listOwners(getAzureId())
+                : Client.listTeachers(getAzureId());
+        for (final JsonElement jsonElement : ownerObject.get("value").getAsJsonArray()) {
             final String id = jsonElement.getAsJsonObject().get("id").getAsString();
             owners.add(id);
             if (getOwnersSet().stream().noneMatch(c -> id.equals(c.getAzureId()))) {
@@ -179,7 +182,9 @@ public class CollaborationGroup extends CollaborationGroup_Base {
                 });
 
         final Set<String> members = new HashSet<>();
-        for (final JsonElement jsonElement : Client.listMembers(getAzureId()).get("value").getAsJsonArray()) {
+        final JsonObject memberObject = executionCourse == null ? Client.listMembers(getAzureId())
+                : Client.listStudents(getAzureId());
+        for (final JsonElement jsonElement : memberObject.get("value").getAsJsonArray()) {
             final String id = jsonElement.getAsJsonObject().get("id").getAsString();
             members.add(id);
             if (getMembersSet().stream().noneMatch(c -> id.equals(c.getAzureId()))) {

@@ -262,6 +262,22 @@ public class Client {
         return new JsonParser().parse(response.getBody()).getAsJsonObject();
     }
 
+    public static JsonObject listStudents(final String groupId) {
+        final HttpResponse<String> response = Unirest.get("https://graph.microsoft.com/v1.0/education/classes/" + groupId + "/members")
+                .header("Content-type", "application/json")
+                .header("Authorization", "Bearer " + Client.getAccessToken())
+                .asString();
+        return new JsonParser().parse(response.getBody()).getAsJsonObject();
+    }
+
+    public static JsonObject listTeachers(final String groupId) {
+        final HttpResponse<String> response = Unirest.get("https://graph.microsoft.com/v1.0/education/classes/" + groupId + "/teachers")
+                .header("Content-type", "application/json")
+                .header("Authorization", "Bearer " + Client.getAccessToken())
+                .asString();
+        return new JsonParser().parse(response.getBody()).getAsJsonObject();
+    }
+
     public static void removeOwner(final String groupId, final String owner) {
         final String url = "https://graph.microsoft.com/v1.0/groups/" + groupId + "/owners/" + owner +"/$ref";
         final HttpResponse response = Unirest.delete(url)
