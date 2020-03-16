@@ -174,10 +174,13 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         getOwnersSet().stream()
                 .filter(c -> !owners.contains(c.getAzureId()))
                 .forEach(c -> {
-                    if (executionCourse == null) {
-                        Client.addOwnerToGroup(getAzureUrl(), c.getAzureId());
-                    } else {
-                        Client.addTeacher(getAzureId(), c.getAzureId());
+                    try {
+                        if (executionCourse == null) {
+                            Client.addOwnerToGroup(getAzureUrl(), c.getAzureId());
+                        } else {
+                            Client.addTeacher(getAzureId(), c.getAzureId());
+                        }
+                    } catch (final Throwable t) {
                     }
                 });
 
@@ -198,10 +201,13 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         getMembersSet().stream()
                 .filter(c -> !members.contains(c.getAzureId()))
                 .forEach(c -> {
-                    if (executionCourse == null) {
-                        Client.addMemberToGroup(getAzureUrl(), c.getAzureId());
-                    } else {
-                        Client.addStudent(getAzureId(), c.getAzureId());
+                    try {
+                        if (executionCourse == null) {
+                            Client.addMemberToGroup(getAzureUrl(), c.getAzureId());
+                        } else {
+                            Client.addStudent(getAzureId(), c.getAzureId());
+                        }
+                    } catch (final Throwable t) {
                     }
                 });
     }
