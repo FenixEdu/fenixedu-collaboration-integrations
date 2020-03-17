@@ -160,6 +160,7 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         final Set<String> owners = new HashSet<>();
         final JsonObject ownerObject = executionCourse == null ? Client.listOwners(getAzureId())
                 : Client.listTeachers(getAzureId());
+        int ownerDiff = 0;
         for (final JsonElement jsonElement : ownerObject.get("value").getAsJsonArray()) {
             final String id = jsonElement.getAsJsonObject().get("id").getAsString();
             owners.add(id);
@@ -169,8 +170,10 @@ public class CollaborationGroup extends CollaborationGroup_Base {
                 } else {
                     Client.removeTeacher(getAzureId(), id);
                 }
+                ownerDiff++;
             }
         }
+        setAzureOwnerCount(owners.size() - ownerDiff);
         getOwnersSet().stream()
                 .filter(c -> !owners.contains(c.getAzureId()))
                 .forEach(c -> {
@@ -187,6 +190,7 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         final Set<String> members = new HashSet<>();
         final JsonObject memberObject = executionCourse == null ? Client.listMembers(getAzureId())
                 : Client.listStudents(getAzureId());
+        int memberDiff = 0;
         for (final JsonElement jsonElement : memberObject.get("value").getAsJsonArray()) {
             final String id = jsonElement.getAsJsonObject().get("id").getAsString();
             members.add(id);
@@ -196,8 +200,10 @@ public class CollaborationGroup extends CollaborationGroup_Base {
                 } else {
                     Client.removeStudent(getAzureId(), id);
                 }
+                memberDiff++;
             }
         }
+        setAzureMemberCount(members.size() - memberDiff);
         getMembersSet().stream()
                 .filter(c -> !members.contains(c.getAzureId()))
                 .forEach(c -> {

@@ -8,6 +8,8 @@ class CollaborationGroup {
     String name;
     String azureId;
     String azureUrl;
+    int azureOwnerCount;
+    int azureMemberCount;
 }
 
 relation CollaboratorUser {

@@ -11,14 +11,10 @@
     <spring:message code="title.collaboration.azure" text="Microsoft Teams"/>
 </h3>
 <div class="warning alert-danger" style="margin: 10px; padding: 20px;">
-    <p class="warning">
-        <spring:message code="label.collaboration.azure.warning" text="Warning Message" />
-    </p>
+    <p class="warning"><spring:message code="label.collaboration.azure.warning" text="Warning Message" /></p>
 </div>
 <div class="warning alert-warning" style="margin: 10px; padding: 20px;">
-    <p class="warning">
-        <spring:message code="label.collaboration.azure.timing" text="Timing Message" />
-    </p>
+    <p class="warning"><spring:message code="label.collaboration.azure.timing" text="Timing Message" /></p>
 </div>
 <spring:message var="confirmDelete" code="label.collaboration.group.confirmDelete" text="Are you sure you want to delete the group" />
 <table class="table tdmiddle">
@@ -63,9 +59,9 @@
                             <span style="color: gray;"><spring:message code="title.collaboration.group.members.managed.remotely" text="Members Managed Remotely"/></span>
                         </c:if>
                         <c:if test="${not empty group.executionCourse}">
-                            <span style="color: gray;"><spring:message code="title.collaboration.group.owners.count" text="Owners"/>: ${fn:length(group.owners)}</span>
+                            <span style="color: gray;"><spring:message code="title.collaboration.group.owners.count" text="Owners"/>: ${group.azureOwnerCount} / ${fn:length(group.owners)}</span>
                             <br/>
-                            <span style="color: gray;"><spring:message code="title.collaboration.group.members.count" text="Members"/>: ${fn:length(group.members)}</span>
+                            <span style="color: gray;"><spring:message code="title.collaboration.group.members.count" text="Members"/>: ${group.azureMemberCount} / ${fn:length(group.members)}</span>
                         </c:if>
                     </c:if>
                 </td>
