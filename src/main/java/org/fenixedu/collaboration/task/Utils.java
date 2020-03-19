@@ -30,7 +30,7 @@ public class Utils {
                     if (je.isJsonNull()) {
                         pad(o + 2, "null", logger);
                     } else if (je.isJsonPrimitive()) {
-                        pad(o + 2, v.getAsString(), logger);
+                        pad(o + 2, je.getAsString(), logger);
                     } else if (je.isJsonObject()) {
                         prettyPrint(je.getAsJsonObject(), o + 2, logger);
                     } else if (je.isJsonArray()) {
