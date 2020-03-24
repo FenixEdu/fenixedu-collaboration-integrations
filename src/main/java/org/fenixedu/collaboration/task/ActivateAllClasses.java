@@ -4,11 +4,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.fenixedu.academic.domain.ExecutionCourse;
 import org.fenixedu.academic.domain.ExecutionSemester;
+import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
-import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.scheduler.CronTask;
 import org.fenixedu.bennu.scheduler.annotation.Task;
-import org.fenixedu.bennu.scheduler.custom.CustomTask;
 import org.fenixedu.collaboration.domain.CollaborationGroup;
 import org.fenixedu.collaboration.domain.Collaborator;
 import org.fenixedu.collaboration.domain.azure.Client;
@@ -31,7 +30,27 @@ public class ActivateAllClasses extends CronTask {
     public void runTask() throws Exception {
         ExecutionSemester.readActualExecutionSemester().getAssociatedExecutionCoursesSet().stream()
                 .forEach(ec -> processTx(ec));
+        Bennu.getInstance().getUserSet().stream()
+                .map(u -> u.getCollaborator())
+                .filter(c -> c != null)
+                .flatMap(c -> c.getOwnedGroupSet().stream())
+                .filter(group -> group.getAzureUrl() == null || group.getAzureUrl().isEmpty())
+                .forEach(group -> processTx(group));
         taskLog("Done");
+    }
+
+    private void processTx(final CollaborationGroup group) {
+        try {
+            FenixFramework.atomic(() -> {
+                if (group.getAzureUrl() == null || group.getAzureUrl().isEmpty()) {
+                    taskLog("Creating team %s (%s)%n", group.getName(), group.getExternalId());
+                    group.createTeam();
+                    taskLog("   team url: %s%n", group.getAzureUrl());
+                }
+            });
+        } catch (final Throwable t) {
+            taskLog("Skipping %s (%s) due to error: %s%n", group.getName(), group.getExternalId(), t.getMessage());
+        }
     }
 
     private void processTx(final ExecutionCourse executionCourse) {
