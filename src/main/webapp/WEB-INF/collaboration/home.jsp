@@ -66,14 +66,6 @@
                     </c:if>
                 </td>
                 <td>
-                    <c:if test="${empty group.azureUrl}">
-                        <form class="form-horizontal" method="POST" action="<%= contextPath %>/collaboration/${group.externalId}/activateGroup">
-                            ${csrf.field()}
-                            <button id="submitRequest" class="btn btn-primary">
-                                <spring:message code="label.activate" text="Activate" />
-                            </button>
-                        </form>
-                    </c:if>
                     <c:if test="${not empty group.executionCourse}">
                         <c:if test="${not empty group.azureUrl}">
                             <form class="form-horizontal" method="POST" action="<%= contextPath %>/collaboration/${group.externalId}/updateMembers">
