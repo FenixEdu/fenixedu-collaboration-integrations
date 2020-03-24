@@ -1,6 +1,5 @@
 package org.fenixedu.collaboration.domain;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.fenixedu.academic.domain.ExecutionCourse;
@@ -26,6 +25,20 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         setName(groupName);
         add(getOwnersSet(), owners);
         add(getMembersSet(), members);
+
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(60000);
+                    FenixFramework.atomic(() -> {
+                        createTeam();
+                    });
+                } catch (final InterruptedException e) {
+                    throw new Error(e);
+                }
+            }
+        }.start();
     }
 
     private static Set<String> getAzureIds(final Set<Collaborator> collaborators) {
