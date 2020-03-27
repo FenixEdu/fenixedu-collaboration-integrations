@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @SpringFunctionality(app = CollaborationController.class, title = "title.collaboration.azure")
-@RequestMapping("/azure")
+@RequestMapping("/collaboration/azure")
 public class AzureCollaborationController {
 
     @RequestMapping(method = RequestMethod.GET)

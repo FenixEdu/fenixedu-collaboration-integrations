@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @SpringFunctionality(app = CollaborationController.class, title = "title.collaboration.google")
-@RequestMapping("/google")
+@RequestMapping("/collaboration/google")
 public class GoogleCollaborationController {
 
     @RequestMapping(method = RequestMethod.GET)
