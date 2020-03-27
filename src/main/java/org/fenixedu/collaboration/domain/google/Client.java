@@ -123,7 +123,7 @@ public class Client {
             }
         }
         final JsonElement nextPageTokenElement = result.get("nextPageToken");
-        if (nextPageToken != null && !nextPageTokenElement.isJsonNull()) {
+        if (nextPageTokenElement != null && !nextPageTokenElement.isJsonNull()) {
             get(url, consumer, objectArrayField, nextPageTokenElement.getAsString());
         }
     }
