@@ -10,7 +10,7 @@ import org.fenixedu.collaboration.domain.google.Client;
 import java.util.Map;
 
 @Task(readOnly = true, englishTitle = "Read Google Users and store their remote IDs")
-public class UpdateGoogleUsersTask extends CustomTask {
+public class UpdateGoogleUsersTask extends CronTask {
 
     @Override
     public void runTask() throws Exception {
