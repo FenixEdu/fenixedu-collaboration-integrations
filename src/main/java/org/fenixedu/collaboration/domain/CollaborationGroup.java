@@ -64,7 +64,7 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         final String ownerId = Authenticate.getUser().getCollaborator().getGoogleId();
         final JsonObject result = org.fenixedu.collaboration.domain.google.Client.createCourse(ownerId,
                 group.getName(), groupDescription);
-        group.setAzureId(result.get("id").getAsString());
+        group.setGoogleId(result.get("id").getAsString());
         group.setGoogleUrl(result.get("alternateLink").getAsString());
         group.setGoogleEnrollmentCode(result.get("enrollmentCode").getAsString());
         return group;
