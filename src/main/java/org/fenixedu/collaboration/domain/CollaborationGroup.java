@@ -66,6 +66,7 @@ public class CollaborationGroup extends CollaborationGroup_Base {
                 group.getName(), groupDescription);
         group.setAzureId(result.get("id").getAsString());
         group.setGoogleUrl(result.get("alternateLink").getAsString());
+        group.setGoogleEnrollmentCode(result.get("googleEnrollmentCode").getAsString());
         return group;
     }
 
