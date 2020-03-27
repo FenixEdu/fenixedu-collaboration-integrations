@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>collaboration-integrations</artifactId>
-    <version>DEV-SNAPSHOT</version>
+    <version>2.0.1</version>
     <packaging>jar</packaging>
     <name>FenixEdu Collaboration Integrations</name>
     <url>http://fenixedu.org</url>
