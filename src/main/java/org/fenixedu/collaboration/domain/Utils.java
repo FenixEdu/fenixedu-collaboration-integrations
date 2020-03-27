@@ -2,7 +2,6 @@ package org.fenixedu.collaboration.domain;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.fenixedu.collaboration.domain.azure.Client;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,12 +23,15 @@ public class Utils {
         final Set<String> set = new HashSet<>();
         final JsonObject list = listCollaborator.apply(groupId);
         int ownerDiff = 0;
-        for (final JsonElement jsonElement : list.get(listGetter).getAsJsonArray()) {
-            final String id = jsonElement.getAsJsonObject().get("id").getAsString();
-            set.add(id);
-            if (collaborators.stream().noneMatch(c -> id.equals(c.getAzureId()))) {
-                removeCollaborator.accept(id);
-                ownerDiff++;
+        final JsonElement listElement = list.get(listGetter);
+        if (listElement != null && !listElement.isJsonNull()) {
+            for (final JsonElement jsonElement : listElement.getAsJsonArray()) {
+                final String id = jsonElement.getAsJsonObject().get("id").getAsString();
+                set.add(id);
+                if (collaborators.stream().noneMatch(c -> id.equals(c.getAzureId()))) {
+                    removeCollaborator.accept(id);
+                    ownerDiff++;
+                }
             }
         }
         countSetter.accept(set.size() - ownerDiff);
