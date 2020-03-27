@@ -19,7 +19,7 @@ public class UpdateClassroom {
         final Function<String, JsonObject> listMembers = Client::listStudents;
         final Consumer<Collaborator> addMember = c -> Client.addStudent(group.getGoogleId(), group.getGoogleEnrollmentCode(), c.getGoogleId());
         final Consumer<String> removeMember = id -> Client.removeStudent(group.getGoogleId(), id);
-        Utils.updateMembers(group.getGoogleId(), listMembers, "students", group::setGoogleMemberCount, group.getOwnersSet(), addMember, removeMember);
+        Utils.updateMembers(group.getGoogleId(), listMembers, "students", group::setGoogleMemberCount, group.getMembersSet(), addMember, removeMember);
     }
 
 }

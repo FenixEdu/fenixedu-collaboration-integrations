@@ -39,7 +39,7 @@ public class UpdateTeam {
             removeMember = id -> Client.removeStudent(group.getAzureId(), id);
         }
         Utils.updateMembers(group.getAzureId(), listMembers, "value", group::setAzureMemberCount,
-                group.getOwnersSet(), addMember, removeMember);
+                group.getMembersSet(), addMember, removeMember);
     }
 
 }
