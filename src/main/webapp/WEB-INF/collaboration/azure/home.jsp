@@ -28,6 +28,7 @@
     </thead>
     <tbody>
         <c:forEach var="group" items="${user.collaborator.ownedGroup}">
+            <c:if test="${not empty group.azureId}">
             <tr>
                 <td>
                     <c:if test="${empty group.executionCourse}">
@@ -68,7 +69,7 @@
                 <td>
                     <c:if test="${not empty group.executionCourse}">
                         <c:if test="${not empty group.azureUrl}">
-                            <form class="form-horizontal" method="POST" action="<%= contextPath %>/collaboration/${group.externalId}/updateMembers">
+                            <form class="form-horizontal" method="POST" action="<%= contextPath %>/collaboration/azure/${group.externalId}/updateMembers">
                                     ${csrf.field()}
                                 <button id="submitRequest" class="btn btn-default">
                                     <spring:message code="label.updateMembers" text="Update Members" />
@@ -78,7 +79,7 @@
                         </c:if>
                     </c:if>
                     <c:if test="${not empty group.azureUrl}">
-                        <form class="form-horizontal" method="POST" action="<%= contextPath %>/collaboration/${group.externalId}/delete">
+                        <form class="form-horizontal" method="POST" action="<%= contextPath %>/collaboration/azure/${group.externalId}/delete">
                             ${csrf.field()}
                             <button id="submitRequest" class="btn btn-danger" onclick="return confirm('${confirmDelete}');">
                                 <spring:message code="label.delete" text="Delete" />
@@ -87,6 +88,7 @@
                     </c:if>
                 </td>
             </tr>
+            </c:if>
         </c:forEach>
         <c:forEach var="group" items="${user.collaborator.memberGroup}">
             <tr>
@@ -140,7 +142,7 @@
                     <spring:message code="title.collaboration.group.not.created" text="Not Created"/>
                 </td>
                 <td>
-                    <form class="form-horizontal" method="POST" action="<%= contextPath %>/collaboration/${executionCourse.externalId}/createGroup">
+                    <form class="form-horizontal" method="POST" action="<%= contextPath %>/collaboration/azure/${executionCourse.externalId}/createGroup">
                         ${csrf.field()}
                         <button id="submitRequest" class="btn btn-primary">
                             <spring:message code="label.create" text="Create" />
@@ -159,7 +161,7 @@
                 <td>
                 </td>
                 <td>
-                    <form class="form-horizontal" method="GET" action="<%= contextPath %>/collaboration/createNewTeam">
+                    <form class="form-horizontal" method="GET" action="<%= contextPath %>/collaboration/azure/createNewTeam">
                         ${csrf.field()}
                         <button id="submitRequest" class="btn btn-primary">
                             <spring:message code="label.create" text="Create" />

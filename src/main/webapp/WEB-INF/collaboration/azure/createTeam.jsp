@@ -15,7 +15,7 @@
     <spring:message code="title.collaboration.azure.createTeam" text="Create Team"/>
 </h4>
 
-<form class="form-horizontal" method="POST" action="<%= contextPath %>/collaboration/createNewTeam">
+<form class="form-horizontal" method="POST" action="<%= contextPath %>/collaboration/azure/createNewTeam">
     ${csrf.field()}
 
     <div class="form-group">

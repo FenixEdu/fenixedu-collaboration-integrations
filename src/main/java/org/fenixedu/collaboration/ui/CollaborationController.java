@@ -24,110 +24,67 @@ import org.fenixedu.academic.domain.Person;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
-import org.fenixedu.bennu.core.security.SkipCSRF;
 import org.fenixedu.bennu.spring.portal.SpringApplication;
-import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.collaboration.domain.CollaborationGroup;
+import org.fenixedu.collaboration.domain.Collaborator;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @SpringApplication(group = "logged", path = "collaboration-integrations", title = "title.collaboration", hint = "Collaboration")
-@SpringFunctionality(app = CollaborationController.class, title = "title.collaboration")
 @RequestMapping("/collaboration")
 public class CollaborationController {
 
-    @RequestMapping(method = RequestMethod.GET)
-    public String home(final Model model) {
+    static String home(final Model model, final String returnPath,
+                       final Predicate<CollaborationGroup> allowCreatePredicate,
+                       final Function<Collaborator, String> toUserId) {
         final User user = Authenticate.getUser();
         model.addAttribute("user", user);
 
-        final Person person = user.getPerson();
-        if (person != null) {
-            final Set<ExecutionCourse> courses = person.getProfessorships(ExecutionSemester.readActualExecutionSemester()).stream()
-                    .map(p -> p.getExecutionCourse())
-                    .filter(ec -> ec.getCollaborationGroup() == null)
-                    .collect(Collectors.toSet());
-            model.addAttribute("ownedCourses", courses);
-        }
-
-        if (allowdToCreateGroups(user)) {
+        final Collaborator collaborator = user.getCollaborator();
+        final String userId = collaborator == null ? null : toUserId.apply(collaborator);
+        if (userId != null && !userId.isEmpty() && allowdToCreateGroups(user)) {
             model.addAttribute("allowdToCreateGroups", Boolean.TRUE);
+
+            final Person person = user.getPerson();
+            if (person != null) {
+                final Set<ExecutionCourse> courses = person.getProfessorships(ExecutionSemester.readActualExecutionSemester()).stream()
+                        .map(p -> p.getExecutionCourse())
+                        .filter(ec -> ec.getCollaborationGroup() == null || allowCreatePredicate.test(ec.getCollaborationGroup()))
+                        .collect(Collectors.toSet());
+                model.addAttribute("ownedCourses", courses);
+            }
         }
 
-        return "collaboration/home";
+        return returnPath;
     }
 
-    private boolean allowdToCreateGroups(final User user) {
+    static boolean allowdToCreateGroups(final User user) {
         return Group.parse("activeResearchers | activeGrantOwner | activeEmployees | activeTeachers").isMember(user);
     }
 
-    @SkipCSRF
-    @RequestMapping(value = "/{executionCourse}/createGroup", method = RequestMethod.POST)
-    public String createGroupForExecutionCourse(final @PathVariable ExecutionCourse executionCourse) {
-        if (isTeacher(executionCourse)) {
-            CollaborationGroup.create(executionCourse);
-        }
-        return "redirect:/collaboration";
-    }
-
-    private boolean isTeacher(final ExecutionCourse executionCourse) {
+    static boolean isTeacher(final ExecutionCourse executionCourse) {
         final User user = Authenticate.getUser();
         return executionCourse.getProfessorshipsSet().stream()
                 .anyMatch(p -> p.getPerson().getUser() == user);
     }
 
-    @SkipCSRF
-    @RequestMapping(value = "/{group}/activateGroup", method = RequestMethod.POST)
-    public String activateGroup(final @PathVariable CollaborationGroup group) {
-        group.createTeam();
-        return "redirect:/collaboration";
-    }
-
-    @SkipCSRF
-    @RequestMapping(value = "/{group}/updateMembers", method = RequestMethod.POST)
-    public String updateMembers(final @PathVariable CollaborationGroup group) {
+    static String updateMembers(final CollaborationGroup group, final String returnPath) {
         group.updateMembers();
-        return "redirect:/collaboration";
+        return returnPath;
     }
 
-    @SkipCSRF
-    @RequestMapping(value = "/{group}/delete", method = RequestMethod.POST)
-    public String deleteGroup(final @PathVariable CollaborationGroup group) {
+    static String deleteGroup(final CollaborationGroup group, final String returnPath) {
         final User user = Authenticate.getUser();
         if (group.getOwnersSet().stream().map(c -> c.getUser()).anyMatch(u -> u == user)) {
             group.delete();
         }
-        return "redirect:/collaboration";
+        return returnPath;
     }
-
-    @RequestMapping(value = "/createNewTeam", method = RequestMethod.GET)
-    public String prepareCreateNewTeam() {
-        return "collaboration/createTeam";
-    }
-
-    @SkipCSRF
-    @RequestMapping(value = "/createNewTeam", method = RequestMethod.POST)
-    public String createNewTeam(final Model model, @RequestParam(required = false) String name,
-                                @RequestParam(required = false) String description) {
-        final CollaborationGroup group = CollaborationGroup.create(name, description);
-        return "redirect:/collaboration";
-    }
-
-    /*
-    @RequestMapping(value = "/{group}/manageMembers", method = RequestMethod.GET)
-    public String manageMembers(final Model model) {
-        final User user = Authenticate.getUser();
-        if (group.getOwnersSet().stream().map(c -> c.getUser()).anyMatch(u -> u == user)) {
-            group.delete();
-        }
-        return "redirect:/collaboration";
-    }
-     */
 
 }

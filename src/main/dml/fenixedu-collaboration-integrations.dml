@@ -2,6 +2,7 @@ package org.fenixedu.collaboration.domain;
 
 class Collaborator {
     String azureId;
+    String googleId;
 }
 
 class CollaborationGroup {
@@ -10,6 +11,11 @@ class CollaborationGroup {
     String azureUrl;
     int azureOwnerCount;
     int azureMemberCount;
+    String googleId;
+    String googleUrl;
+    String googleEnrollmentCode;
+    int googleOwnerCount;
+    int googleMemberCount;
 }
 
 relation CollaboratorUser {

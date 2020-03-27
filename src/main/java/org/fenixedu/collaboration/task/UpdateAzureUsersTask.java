@@ -17,20 +17,7 @@ public class UpdateAzureUsersTask extends CronTask {
 
     @Override
     public void runTask() throws Exception {
-        final Map<String, User> userMap = new HashMap<>();
-        Bennu.getInstance().getUserSet().stream()
-                .forEach(user -> {
-                    final Person person = user.getPerson();
-                    if (person != null) {
-                        final String username = user.getUsername();
-                        final String domain = CollaborationIntegrationsConfiguration.getConfiguration().organizationDomain();
-                        userMap.put(username + domain, user);
-                        person.getEmailAddressStream()
-                                .map(ea -> ea.getValue())
-                                .filter(v -> v.endsWith(domain))
-                                .forEach(e -> userMap.put(e, user));
-                    }
-                });
+        final Map<String, User> userMap = Utils.emailUserMap();
         taskLog("Loaded %s user keys to UserMap.%n", userMap.size());
         Client.users(userJson -> {
             final String id = userJson.get("id").getAsString();

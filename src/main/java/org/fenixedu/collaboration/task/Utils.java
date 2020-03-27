@@ -3,7 +3,12 @@ package org.fenixedu.collaboration.task;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.fenixedu.academic.domain.Person;
+import org.fenixedu.bennu.CollaborationIntegrationsConfiguration;
+import org.fenixedu.bennu.core.domain.Bennu;
+import org.fenixedu.bennu.core.domain.User;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -50,6 +55,24 @@ public class Utils {
         }
         builder.append(s);
         logger.accept(builder.toString());
+    }
+
+    public static Map<String, User> emailUserMap() {
+        final Map<String, User> userMap = new HashMap<>();
+        Bennu.getInstance().getUserSet().stream()
+                .forEach(user -> {
+                    final Person person = user.getPerson();
+                    if (person != null) {
+                        final String username = user.getUsername();
+                        final String domain = CollaborationIntegrationsConfiguration.getConfiguration().organizationDomain();
+                        userMap.put(username + domain, user);
+                        person.getEmailAddressStream()
+                                .map(ea -> ea.getValue())
+                                .filter(v -> v.endsWith(domain))
+                                .forEach(e -> userMap.put(e, user));
+                    }
+                });
+        return userMap;
     }
 
 }
