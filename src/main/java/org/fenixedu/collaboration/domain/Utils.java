@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class Utils {
 
@@ -36,13 +37,13 @@ public class Utils {
                 final String id = jsonElement.getAsJsonObject().get("id").getAsString();
 //                System.out.println("      adding: " + id);
                 set.add(id);
-                if (collaborators.stream().noneMatch(c -> id.equals(toCollaboratorId.apply(c)))) {
+                if (collaboratorStream(collaborators, toCollaboratorId).noneMatch(c -> id.equals(toCollaboratorId.apply(c)))) {
                     removeCollaborator.accept(id);
                     ownerDiff[0]++;
                 }
             }
         }
-        collaborators.stream()
+        collaboratorStream(collaborators, toCollaboratorId)
                 .filter(c -> !set.contains(toCollaboratorId.apply(c)))
                 .forEach(c -> {
                     try {
@@ -52,6 +53,14 @@ public class Utils {
                     }
                 });
         countSetter.accept(set.size() - ownerDiff[0]);
+    }
+
+    private static Stream<Collaborator> collaboratorStream(final Set<Collaborator> collaborators, final Function<Collaborator, String> toCollaboratorId) {
+        return collaborators.stream().filter(c -> isValid(toCollaboratorId.apply(c)));
+    }
+
+    private static boolean isValid(final String id) {
+        return id != null && !id.isEmpty();
     }
 
 }
