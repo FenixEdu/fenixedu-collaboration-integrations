@@ -78,6 +78,9 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         final CollaborationGroup group = new CollaborationGroup(groupName, owners, Collections.emptySet());
         final JsonObject result = Client.createGrouo(groupName, description, getAzureIds(group.getOwnersSet()),
                 Collections.emptySet());
+        if (result.get("id") == null || result.get("id").isJsonNull()) {
+            System.out.println("Error creating azure group: " + result.toString());
+        }
         group.setAzureId(result.get("id").getAsString());
         return group;
     }
@@ -162,16 +165,8 @@ public class CollaborationGroup extends CollaborationGroup_Base {
 
     @Atomic
     public void delete() {
-        try {
-            if (getAzureId() != null && !getAzureId().isEmpty()) {
-                if (getExecutionCourse() == null) {
-                    Client.deleteGroup(getAzureId());
-                } else {
-                    Client.deleteClass(getAzureId());
-                }
-            }
-        } catch (final Throwable t) {
-            System.out.println("Unable to delete remote group: " + getAzureId() + " for domain object " + getExternalId());
+        if (getGoogleId() != null || !getgoo) {
+
         }
         getOwnersSet().clear();
         getMembersSet().clear();
@@ -179,4 +174,32 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         deleteDomainObject();
     }
 
+    @Atomic
+    public void deleteGoogleClassroom() {
+        org.fenixedu.collaboration.domain.google.Client.delete(getGoogleId());
+        setGoogleId(null);
+        setGoogleUrl(null);
+        setGoogleEnrollmentCode(null);
+        setGoogleMemberCount(0);
+        setGoogleOwnerCount(0);
+        if (getAzureId() == null && getAzureId().isEmpty()) {
+            delete();
+        }
+    }
+
+    @Atomic
+    public void deleteAzureTeam() {
+        if (getExecutionCourse() == null) {
+            Client.deleteGroup(getAzureId());
+        } else {
+            Client.deleteClass(getAzureId());
+        }
+        setAzureId(null);
+        setAzureUrl(null);
+        setAzureMemberCount(0);
+        setAzureOwnerCount(0);
+        if (getGoogleId() == null || getGoogleId().isEmpty()) {
+            delete();
+        }
+    }
 }

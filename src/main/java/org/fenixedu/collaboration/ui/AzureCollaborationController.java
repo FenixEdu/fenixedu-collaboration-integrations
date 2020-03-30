@@ -19,6 +19,8 @@
 package org.fenixedu.collaboration.ui;
 
 import org.fenixedu.academic.domain.ExecutionCourse;
+import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.security.SkipCSRF;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
 import org.fenixedu.collaboration.domain.CollaborationGroup;
@@ -64,7 +66,11 @@ public class AzureCollaborationController {
     @SkipCSRF
     @RequestMapping(value = "/{group}/delete", method = RequestMethod.POST)
     public String deleteGroup(final @PathVariable CollaborationGroup group) {
-        return CollaborationController.deleteGroup(group, "redirect:/collaboration/azure");
+        final User user = Authenticate.getUser();
+        if (group.getOwnersSet().stream().map(c -> c.getUser()).anyMatch(u -> u == user)) {
+            group.deleteAzureTeam();
+        }
+        return "redirect:/collaboration/azure";
     }
 
     @RequestMapping(value = "/createNewTeam", method = RequestMethod.GET)
