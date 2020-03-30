@@ -179,7 +179,7 @@ public class Client {
     public static JsonObject listStudents(final String courseId) {
         final JsonObject result = new JsonObject();
         final JsonArray students = new JsonArray();
-        listTeachers(courseId, student -> students.add(student));
+        listStudents(courseId, student -> students.add(student));
         result.add("students", students);
         return result;
     }
