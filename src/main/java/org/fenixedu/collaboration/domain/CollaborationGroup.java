@@ -165,13 +165,13 @@ public class CollaborationGroup extends CollaborationGroup_Base {
 
     @Atomic
     public void delete() {
-        if (getGoogleId() != null || !getgoo) {
-
+        if ((getGoogleId() == null || getGoogleId().isEmpty())
+                && (getAzureId() == null && getAzureId().isEmpty())) {
+            getOwnersSet().clear();
+            getMembersSet().clear();
+            setExecutionCourse(null);
+            deleteDomainObject();
         }
-        getOwnersSet().clear();
-        getMembersSet().clear();
-        setExecutionCourse(null);
-        deleteDomainObject();
     }
 
     @Atomic
