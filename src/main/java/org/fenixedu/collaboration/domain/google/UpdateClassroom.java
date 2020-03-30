@@ -14,12 +14,14 @@ public class UpdateClassroom {
         final Function<String, JsonObject> listOwners = Client::listTeachers;
         final Consumer<Collaborator> addOwner = c -> Client.addTeacher(group.getGoogleId(), c.getGoogleId());
         final Consumer<String> removeOwner = id -> Client.removeTeacher(group.getGoogleId(), id);
-        Utils.updateMembers(group.getGoogleId(), listOwners, "teachers", group::setGoogleOwnerCount, group.getOwnersSet(), addOwner, removeOwner);
+        Utils.updateMembers(group.getGoogleId(), listOwners, "teachers", group::setGoogleOwnerCount,
+                group.getOwnersSet(), addOwner, removeOwner, c -> c.getGoogleId());
 
         final Function<String, JsonObject> listMembers = Client::listStudents;
         final Consumer<Collaborator> addMember = c -> Client.addStudent(group.getGoogleId(), group.getGoogleEnrollmentCode(), c.getGoogleId());
         final Consumer<String> removeMember = id -> Client.removeStudent(group.getGoogleId(), id);
-        Utils.updateMembers(group.getGoogleId(), listMembers, "students", group::setGoogleMemberCount, group.getMembersSet(), addMember, removeMember);
+        Utils.updateMembers(group.getGoogleId(), listMembers, "students", group::setGoogleMemberCount,
+                group.getMembersSet(), addMember, removeMember, c -> c.getGoogleId());
     }
 
 }

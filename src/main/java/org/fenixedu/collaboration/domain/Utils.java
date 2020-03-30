@@ -16,33 +16,42 @@ public class Utils {
                                       final Consumer<Integer> countSetter,
                                       final Set<Collaborator> collaborators,
                                       final Consumer<Collaborator> addCollaborator,
-                                      final Consumer<String> removeCollaborator) {
+                                      final Consumer<String> removeCollaborator,
+                                      final Function<Collaborator, String> toCollaboratorId) {
         if (groupId == null || groupId.isEmpty()) {
             return;
         }
+//        System.out.println();
+//        System.out.println();
+//        System.out.println("Updating group: " + groupId);
         final Set<String> set = new HashSet<>();
         final JsonObject list = listCollaborator.apply(groupId);
-        int ownerDiff = 0;
+//        System.out.println("   members: " + collaborators.size());
+//        System.out.println("   list: " + list.toString());
+//        System.out.println("   getter: " + listGetter);
+        int ownerDiff[] = new int[] { 0 };
         final JsonElement listElement = list.get(listGetter);
         if (listElement != null && !listElement.isJsonNull()) {
             for (final JsonElement jsonElement : listElement.getAsJsonArray()) {
                 final String id = jsonElement.getAsJsonObject().get("id").getAsString();
+//                System.out.println("      adding: " + id);
                 set.add(id);
-                if (collaborators.stream().noneMatch(c -> id.equals(c.getAzureId()))) {
+                if (collaborators.stream().noneMatch(c -> id.equals(toCollaboratorId.apply(c)))) {
                     removeCollaborator.accept(id);
-                    ownerDiff++;
+                    ownerDiff[0]++;
                 }
             }
         }
-        countSetter.accept(set.size() - ownerDiff);
         collaborators.stream()
-                .filter(c -> !set.contains(c.getAzureId()))
+                .filter(c -> !set.contains(toCollaboratorId.apply(c)))
                 .forEach(c -> {
                     try {
                         addCollaborator.accept(c);
+                        ownerDiff[0]--;
                     } catch (final Throwable t) {
                     }
                 });
+        countSetter.accept(set.size() - ownerDiff[0]);
     }
 
 }

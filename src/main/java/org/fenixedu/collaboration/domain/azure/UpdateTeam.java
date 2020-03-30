@@ -24,7 +24,7 @@ public class UpdateTeam {
             removeOwner = id -> Client.removeTeacher(group.getAzureId(), id);
         }
         Utils.updateMembers(group.getAzureId(), listOwners, "value", group::setAzureOwnerCount,
-                group.getOwnersSet(), addOwner, removeOwner);
+                group.getOwnersSet(), addOwner, removeOwner, c -> c.getAzureId());
 
         final Function<String, JsonObject> listMembers;
         final Consumer<Collaborator> addMember;
@@ -39,7 +39,7 @@ public class UpdateTeam {
             removeMember = id -> Client.removeStudent(group.getAzureId(), id);
         }
         Utils.updateMembers(group.getAzureId(), listMembers, "value", group::setAzureMemberCount,
-                group.getMembersSet(), addMember, removeMember);
+                group.getMembersSet(), addMember, removeMember, c -> c.getAzureId());
     }
 
 }
