@@ -18,7 +18,8 @@ public class Utils {
                                       final Set<Collaborator> collaborators,
                                       final Consumer<Collaborator> addCollaborator,
                                       final Consumer<String> removeCollaborator,
-                                      final Function<Collaborator, String> toCollaboratorId) {
+                                      final Function<Collaborator, String> toCollaboratorId,
+                                      final String memberIdGetter) {
         if (groupId == null || groupId.isEmpty()) {
             return;
         }
@@ -28,7 +29,7 @@ public class Utils {
         final JsonElement listElement = list.get(listGetter);
         if (listElement != null && !listElement.isJsonNull()) {
             for (final JsonElement jsonElement : listElement.getAsJsonArray()) {
-                final String id = jsonElement.getAsJsonObject().get("id").getAsString();
+                final String id = jsonElement.getAsJsonObject().get(memberIdGetter).getAsString();
                 set.add(id);
                 if (collaboratorStream(collaborators, toCollaboratorId).noneMatch(c -> id.equals(toCollaboratorId.apply(c)))) {
                     removeCollaborator.accept(id);
