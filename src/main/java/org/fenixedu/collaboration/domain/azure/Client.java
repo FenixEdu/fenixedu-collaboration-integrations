@@ -38,7 +38,6 @@ public class Client {
                     final JsonObject jo = new JsonParser().parse(response.getBody()).getAsJsonObject();
                     accessToken = jo.get("access_token").getAsString();
                     accessTokenValidUnit = LocalDateTime.now().plusSeconds(jo.get("expires_in").getAsInt());
-                    System.out.println("Set new token. Valid until: " + accessTokenValidUnit.toString() + " --> " + accessToken);
                 }
             }
         }
@@ -193,7 +192,7 @@ public class Client {
         final JsonObject result = new JsonParser().parse(response.getBody()).getAsJsonObject();
         final JsonElement error = result.get("error");
         if (error != null && !error.isJsonNull()) {
-            System.out.println("Error creating group: " + response.getBody());
+            throw new Error("Error creating group: " + response.getBody());
         }
         return result;
     }
@@ -215,7 +214,6 @@ public class Client {
         final JsonObject put = new JsonParser().parse(response.getBody()).getAsJsonObject();
         final JsonElement error = put.get("error");
         if (error != null && !error.isJsonNull()) {
-            System.out.println("Error creating team: " + response.getBody());
             final HttpResponse<String> get = Unirest.get("https://graph.microsoft.com/v1.0/groups/" + groupId + "/team")
                     .header("Authorization", "Bearer " + Client.getAccessToken())
                     .asString();
@@ -246,36 +244,44 @@ public class Client {
         return new JsonParser().parse(response.getBody()).getAsJsonObject();
     }
 
-    public static JsonObject listMembers(final String groupId) {
-        final HttpResponse<String> response = Unirest.get("https://graph.microsoft.com/v1.0/groups/" + groupId + "/members")
+    private static JsonObject listCollaborators(final String url) {
+        final JsonObject result = new JsonObject();
+        final JsonArray list = new JsonArray();
+        listCollaborators(url, list);
+        result.add("value", list);
+        return result;
+    }
+
+    private static void listCollaborators(final String url, final JsonArray list) {
+        final HttpResponse<String> response = Unirest.get(url)
                 .header("Content-type", "application/json")
                 .header("Authorization", "Bearer " + Client.getAccessToken())
                 .asString();
-        return new JsonParser().parse(response.getBody()).getAsJsonObject();
+        final JsonObject result = new JsonParser().parse(response.getBody()).getAsJsonObject();
+        final JsonElement value = result.get("value");
+        if (value != null && !value.isJsonNull()) {
+            list.addAll(value.getAsJsonArray());
+        }
+        final JsonElement nextLinkElement = result.get("@odata.nextLink");
+        if (nextLinkElement != null && !nextLinkElement.isJsonNull()) {
+            listCollaborators(nextLinkElement.getAsString(), list);
+        }
+    }
+
+    public static JsonObject listMembers(final String groupId) {
+        return listCollaborators("https://graph.microsoft.com/v1.0/groups/" + groupId + "/members");
     }
 
     public static JsonObject listOwners(final String groupId) {
-        final HttpResponse<String> response = Unirest.get("https://graph.microsoft.com/v1.0/groups/" + groupId + "/owners")
-                .header("Content-type", "application/json")
-                .header("Authorization", "Bearer " + Client.getAccessToken())
-                .asString();
-        return new JsonParser().parse(response.getBody()).getAsJsonObject();
+        return listCollaborators("https://graph.microsoft.com/v1.0/groups/" + groupId + "/owners");
     }
 
     public static JsonObject listStudents(final String groupId) {
-        final HttpResponse<String> response = Unirest.get("https://graph.microsoft.com/v1.0/education/classes/" + groupId + "/members")
-                .header("Content-type", "application/json")
-                .header("Authorization", "Bearer " + Client.getAccessToken())
-                .asString();
-        return new JsonParser().parse(response.getBody()).getAsJsonObject();
+        return listCollaborators("https://graph.microsoft.com/v1.0/education/classes/" + groupId + "/members");
     }
 
     public static JsonObject listTeachers(final String groupId) {
-        final HttpResponse<String> response = Unirest.get("https://graph.microsoft.com/v1.0/education/classes/" + groupId + "/teachers")
-                .header("Content-type", "application/json")
-                .header("Authorization", "Bearer " + Client.getAccessToken())
-                .asString();
-        return new JsonParser().parse(response.getBody()).getAsJsonObject();
+        return listCollaborators("https://graph.microsoft.com/v1.0/education/classes/" + groupId + "/teachers");
     }
 
     public static void removeOwner(final String groupId, final String owner) {

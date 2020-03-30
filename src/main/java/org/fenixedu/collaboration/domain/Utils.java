@@ -22,20 +22,13 @@ public class Utils {
         if (groupId == null || groupId.isEmpty()) {
             return;
         }
-//        System.out.println();
-//        System.out.println();
-//        System.out.println("Updating group: " + groupId);
         final Set<String> set = new HashSet<>();
         final JsonObject list = listCollaborator.apply(groupId);
-//        System.out.println("   members: " + collaborators.size());
-//        System.out.println("   list: " + list.toString());
-//        System.out.println("   getter: " + listGetter);
         int ownerDiff[] = new int[] { 0 };
         final JsonElement listElement = list.get(listGetter);
         if (listElement != null && !listElement.isJsonNull()) {
             for (final JsonElement jsonElement : listElement.getAsJsonArray()) {
                 final String id = jsonElement.getAsJsonObject().get("id").getAsString();
-//                System.out.println("      adding: " + id);
                 set.add(id);
                 if (collaboratorStream(collaborators, toCollaboratorId).noneMatch(c -> id.equals(toCollaboratorId.apply(c)))) {
                     removeCollaborator.accept(id);
