@@ -68,7 +68,8 @@ public class ActivateAllClasses extends CronTask {
                 taskLog("Creating team %s (%s)%n", executionCourse.getNome(), executionCourse.getExternalId());
                 group.createAzureTeam();
                 taskLog("   team url: %s%n", group.getAzureUrl());
-            } else if (isAzure(group) || isGoogle(group)) {
+            }
+            if (isAzure(group) || isGoogle(group)) {
                 taskLog("Updateing members for %s%n", executionCourse.getNome());
                 updateMembers(group);
             }
@@ -76,7 +77,7 @@ public class ActivateAllClasses extends CronTask {
     }
 
     private boolean isAzure(final CollaborationGroup group) {
-        return group.getAzureUrl() != null && !group.getAzureUrl().isEmpty();
+        return group.getAzureId() != null && !group.getAzureId().isEmpty();
     }
 
     private boolean isGoogle(CollaborationGroup group) {
