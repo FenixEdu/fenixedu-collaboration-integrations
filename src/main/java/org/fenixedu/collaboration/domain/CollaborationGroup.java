@@ -202,9 +202,4 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         }
     }
 
-    public int getGoogleUserCount() {
-        return Stream.concat(getOwnersSet().stream(), getMembersSet().stream())
-                .filter(c -> c.get);
-    }
-
 }
