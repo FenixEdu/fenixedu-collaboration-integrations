@@ -199,7 +199,7 @@ public class Client {
     }
 
     public static String clean(String string) {
-        StringNormalizer.normalize(string.replaceAll(" ", "")
+        return StringNormalizer.normalize(string.replaceAll(" ", "")
                 .replaceAll(",", ""));
     }
 
