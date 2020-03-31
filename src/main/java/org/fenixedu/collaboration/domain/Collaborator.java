@@ -13,12 +13,16 @@ public class Collaborator extends Collaborator_Base {
         setUser(user);
     }
 
+    static Collaborator getCollaborator(final User user) {
+        return Singleton.getInstance(() -> user.getCollaborator(), () -> new Collaborator(user));
+    }
+
     private static void setUserId(final User user, final String userId, final Function<Collaborator, String> getter,
                                   final Consumer<Collaborator> setter) {
         if (userId == null || userId.isEmpty()) {
-            throw new Error("azureId cannot be null");
+            throw new Error("userId cannot be null");
         }
-        final Collaborator collaborator = Singleton.getInstance(() -> user.getCollaborator(), () -> new Collaborator(user));
+        final Collaborator collaborator = getCollaborator(user);
         if (!userId.equals(getter.apply(collaborator))) {
             setter.accept(collaborator);
         }

@@ -33,8 +33,7 @@ public class CollaborationGroup extends CollaborationGroup_Base {
 
     private static void add(final Set<Collaborator> collaborators, final Set<User> users) {
         users.stream()
-                .map(user -> user.getCollaborator())
-                .filter(c -> c != null)
+                .map(user -> Collaborator.getCollaborator(user))
                 .forEach(c -> collaborators.add(c));
     }
 
@@ -202,4 +201,10 @@ public class CollaborationGroup extends CollaborationGroup_Base {
             delete();
         }
     }
+
+    public int getGoogleUserCount() {
+        return Stream.concat(getOwnersSet().stream(), getMembersSet().stream())
+                .filter(c -> c.get);
+    }
+
 }
