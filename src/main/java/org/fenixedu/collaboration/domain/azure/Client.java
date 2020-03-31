@@ -5,6 +5,7 @@ import kong.unirest.GetRequest;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import org.fenixedu.bennu.CollaborationIntegrationsConfiguration;
+import org.fenixedu.commons.StringNormalizer;
 import org.fenixedu.commons.stream.StreamUtils;
 
 import java.time.LocalDateTime;
@@ -169,7 +170,7 @@ public class Client {
                                          final Set<String> members) {
         final JsonObject body = new JsonObject();
         body.addProperty("displayName", name.toUpperCase());
-        body.addProperty("mailNickname", name.toLowerCase());
+        body.addProperty("mailNickname", clean(name).toLowerCase());
         body.addProperty("description", description);
         body.addProperty("visibility", "Private");
         final JsonArray groupTypes = new JsonArray();
@@ -195,6 +196,11 @@ public class Client {
             throw new Error("Error creating group: " + response.getBody());
         }
         return result;
+    }
+
+    public static String clean(String string) {
+        StringNormalizer.normalize(string.replaceAll(" ", "")
+                .replaceAll(",", ""));
     }
 
     private static JsonArray toUserArray(final Set<String> members) {
