@@ -10,6 +10,9 @@
 <h3>
     <spring:message code="title.collaboration.google" text="Google Classroom"/>
 </h3>
+<div class="warning alert-warning" style="margin: 10px; padding: 20px;">
+    <p class="warning"><spring:message code="label.collaboration.google.timing" text="Timing Message" /></p>
+</div>
 <spring:message var="confirmDelete" code="label.collaboration.group.confirmDelete" text="Are you sure you want to delete the group" />
 <table class="table tdmiddle">
     <thead>
