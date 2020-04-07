@@ -102,15 +102,6 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         return group;
     }
 
-    private static String courseSlug(final ExecutionCourse executionCourse) {
-        final ExecutionSemester executionPeriod = executionCourse.getExecutionPeriod();
-        final StringBuilder builder = new StringBuilder();
-        builder.append(normalise(executionPeriod.getQualifiedName()));
-        builder.append("-");
-        builder.append(normalise(executionCourse.getSigla()));
-        return builder.toString();
-    }
-
     private static String courseDescription(final ExecutionCourse executionCourse) {
         final ExecutionSemester executionPeriod = executionCourse.getExecutionPeriod();
         final StringBuilder builder = new StringBuilder();
@@ -119,6 +110,15 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         builder.append(executionPeriod.getQualifiedName());
         builder.append(" - ");
         builder.append(executionCourse.getDegreePresentationString());
+        return builder.toString();
+    }
+
+    private static String courseSlug(final ExecutionCourse executionCourse) {
+        final ExecutionSemester executionPeriod = executionCourse.getExecutionPeriod();
+        final StringBuilder builder = new StringBuilder();
+        builder.append(normalise(executionPeriod.getQualifiedName()));
+        builder.append("-");
+        builder.append(normalise(executionCourse.getSigla()));
         return builder.toString();
     }
 

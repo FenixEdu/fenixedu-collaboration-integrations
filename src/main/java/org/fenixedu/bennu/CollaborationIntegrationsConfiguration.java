@@ -39,6 +39,12 @@ public class CollaborationIntegrationsConfiguration {
 
         @ConfigurationProperty(key = "collaboration.google.organization.id", defaultValue = "C1234")
         public String googleOrganizationId();
+
+        @ConfigurationProperty(key = "collaboration.limesurvey.username", defaultValue = "admin")
+        public String limeSurveyUsername();
+
+        @ConfigurationProperty(key = "collaboration.limesurvey.password", defaultValue = "pass")
+        public String limeSurveyPassword();
     }
 
     public static ConfigurationProperties getConfiguration() {

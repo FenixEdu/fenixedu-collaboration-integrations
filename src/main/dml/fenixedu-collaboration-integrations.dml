@@ -18,6 +18,17 @@ class CollaborationGroup {
     int googleMemberCount;
 }
 
+class LimeSurvey {
+    String title;
+    int surveyId;
+    DateTime startSurvey;
+    DateTime endSurvey;
+}
+
+class LimeSurveyParticipant {
+    String participationToken;
+}
+
 relation CollaboratorUser {
 	Collaborator playsRole collaborator {
 	    multiplicity 0..1;
@@ -51,5 +62,32 @@ relation CollaborationGroupExecutionCourse {
     }
 	CollaborationGroup playsRole collaborationGroup {
 	    multiplicity 0..1;
+    }
+}
+
+relation LimeSurveyExecutionCourse {
+	.org.fenixedu.academic.domain.ExecutionCourse playsRole executionCourse {
+	    multiplicity 1..1;
+    }
+	LimeSurvey playsRole limeSurvey {
+	    multiplicity *;
+    }
+}
+
+relation LimeSurveyLimeSurveyParticipant {
+	LimeSurveyParticipant playsRole limeSurveyParticipant {
+	    multiplicity *;
+    }
+	LimeSurvey playsRole limeSurvey {
+	    multiplicity 1..1;
+    }
+}
+
+relation LimeSurveyParticipantUser {
+	LimeSurveyParticipant playsRole limeSurveyParticipant {
+	    multiplicity *;
+    }
+	.org.fenixedu.bennu.core.domain.User playsRole user {
+	    multiplicity 1..1;
     }
 }
