@@ -6,22 +6,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.TextCodec;
-import io.jsonwebtoken.impl.crypto.DefaultSignerFactory;
-import io.jsonwebtoken.impl.crypto.Signer;
 import kong.unirest.HttpRequest;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import org.fenixedu.bennu.CollaborationIntegrationsConfiguration;
+import org.fenixedu.jwt.Tools;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.LocalDateTime;
 import java.util.function.Consumer;
 
@@ -31,40 +24,18 @@ public class Client {
     private static LocalDateTime accessTokenValidUnit = LocalDateTime.now().minusSeconds(1);
 
     private static String jwt() {
-        long nowMillis = System.currentTimeMillis();
-
-        final JsonObject header = new JsonObject();
-        header.addProperty("alg", "RS256");
-        header.addProperty("typ", "JWT");
         final JsonObject claim = new JsonObject();
         claim.addProperty("iss", CollaborationIntegrationsConfiguration.getConfiguration().googleServiceClientISS());
         claim.addProperty("sub", CollaborationIntegrationsConfiguration.getConfiguration().googleServiceClientSubject());
         claim.addProperty("scope", scopes());
         claim.addProperty("aud", "https://oauth2.googleapis.com/token");
-        claim.addProperty("iat", Long.toString(nowMillis / 1000));
-        claim.addProperty("exp", Long.toString((nowMillis + 3600000l) / 1000));
-        final String jwtWithoutSignature = encode(header) + "." + encode(claim);
-        return jwtWithoutSignature + "." + sign(jwtWithoutSignature);
+        return sign(claim);
     }
 
-    private static String sign(final String jwtWithoutSignature) {
-        final byte[] bytesToSign = jwtWithoutSignature.getBytes(Charset.forName("US-ASCII"));
-
-        final File keyFile = new File(CollaborationIntegrationsConfiguration.getConfiguration().googleDir()
-                + File.separator + "private_key.der");
-        try {
-            final byte[] key = Files.readAllBytes(keyFile.toPath());
-
-            final PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(key);
-            final KeyFactory kf = KeyFactory.getInstance("RSA");
-            final Key signingKey = kf.generatePrivate(spec);
-
-            final Signer signer = DefaultSignerFactory.INSTANCE.createSigner(SignatureAlgorithm.RS256, signingKey);
-            final byte[] signature = signer.sign(bytesToSign);
-            return TextCodec.BASE64URL.encode(signature);
-        } catch (final IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new Error(e);
-        }
+    private static String sign(final JsonObject claim) {
+        final String privateKeyPathname = CollaborationIntegrationsConfiguration.getConfiguration().googleDir()
+                + File.separator + "private_key.der";
+        return Tools.sign(SignatureAlgorithm.RS256, privateKeyPathname, claim);
     }
 
     private static String scopes() {
@@ -75,10 +46,6 @@ public class Client {
         } catch (final IOException e) {
             throw new Error(e);
         }
-    }
-
-    private static String encode(final JsonObject jo) {
-        return TextCodec.BASE64URL.encode(jo.toString());
     }
 
     public static String getAccessToken() {

@@ -19,6 +19,7 @@
         <version.org.fenixedu.bennu>6.5.1</version.org.fenixedu.bennu>
         <version.org.fenixedu.academic>22.9.0</version.org.fenixedu.academic>
         <version.javax.servlet.jstl>1.2</version.javax.servlet.jstl>
+        <version.org.fenixedu.JWTTools>1.0.0</version.org.fenixedu.JWTTools>
    </properties>
 
     <dependencies>
@@ -46,6 +47,11 @@
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
             <version>${version.javax.servlet.jstl}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.fenixedu</groupId>
+            <artifactId>JWTTools</artifactId>
+            <version>${version.org.fenixedu.JWTTools}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
