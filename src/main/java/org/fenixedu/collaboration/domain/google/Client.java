@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.TextCodec;
 import kong.unirest.HttpRequest;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
@@ -193,6 +192,10 @@ public class Client {
 
     public static void removeStudent(String courseId, String userId) {
         delete("https://classroom.googleapis.com/v1/courses/" + courseId + "/students" + userId);
+    }
+
+    public static void deleteCourse(final String courseId) {
+        delete("https://classroom.googleapis.com/v1/courses/" + courseId);
     }
 
 }

@@ -175,7 +175,7 @@ public class CollaborationGroup extends CollaborationGroup_Base {
 
     @Atomic
     public void deleteGoogleClassroom() {
-        org.fenixedu.collaboration.domain.google.Client.delete(getGoogleId());
+        org.fenixedu.collaboration.domain.google.Client.deleteCourse(getGoogleId());
         setGoogleId(null);
         setGoogleUrl(null);
         setGoogleEnrollmentCode(null);
