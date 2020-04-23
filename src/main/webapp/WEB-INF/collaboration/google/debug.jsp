@@ -1,3 +1,6 @@
+<%@ page import="com.google.gson.JsonArray" %>
+<%@ page import="com.google.gson.JsonElement" %>
+<%@ page import="com.google.gson.JsonObject" %>
 <%@ page import="org.fenixedu.bennu.core.groups.Group" %>
 <%@ page import="org.fenixedu.bennu.core.security.Authenticate" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
@@ -327,8 +330,63 @@
 <h4>
     Remote Information
 </h4>
-<c:if test="${not empty courses}">
-    <pre class="json-viewer">${courses}</pre>
-</c:if>
+<table class="table tdmiddle">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>ClassRoom</th>
+        <th>OwnerID</th>
+        <th>State</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+        <% final JsonArray courses = (JsonArray) request.getAttribute("courses"); %>
+        <% if (courses != null) { %>
+            <% for (final JsonElement courseE : courses) { %>
+                <% final JsonObject course = courseE.getAsJsonObject(); %>
+                <tr>
+                    <td><%= course.get("id").getAsString() %></td>
+                    <td>
+                        <%= course.get("name").getAsString() %>
+                        <br/>
+                        <%= course.get("section").getAsString() %>
+                    </td>
+                    <td><%= course.get("ownerId").getAsString() %></td>
+                    <td><%= course.get("courseState").getAsString() %></td>
+                    <td>
+                        <form class="form-horizontal" method="POST" action="<%= contextPath %>/collaboration/google/<%= course.get("id").getAsString() %>/directDeleteClassroom">
+                            ${csrf.field()}
+                            <button id="submitRequest" class="btn btn-primary">
+                                <spring:message code="label.create" text="Create" />
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <tr style="background-color: rgb(240, 240, 240);">
+                    <td colspan="5" style="padding: 5px 50px;">
+                        <h5>Teachers</h5>
+                        <ul>
+                            <% for (final JsonElement teacherE : course.get("teachers").getAsJsonArray()) { %>
+                            <% final JsonObject teacher = teacherE.getAsJsonObject(); %>
+                            <% final JsonObject profile = teacher.get("profile").getAsJsonObject(); %>
+                            <% final JsonObject name = profile.get("name").getAsJsonObject(); %>
+                                <li>
+                                    <%= teacher.get("userId").getAsString() %>
+                                    <%= name.get("fullName").getAsString() %>
+                                    <%= profile.get("emailAddress").getAsString() %>
+                                </li>
+                            <% } %>
+                        </ul>
+                        <h5>Students</h5>
+                        <p>
+                            <%= course.get("teachers").getAsJsonArray().size() %>
+                        </p>
+                    </td>
+                </tr>
+            <% } %>
+        <% } %>
+    </tbody>
+</table>
 
 <% } %>

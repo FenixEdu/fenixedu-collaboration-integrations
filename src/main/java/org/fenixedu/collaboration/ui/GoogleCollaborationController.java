@@ -22,6 +22,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.fenixedu.academic.domain.ExecutionCourse;
 import org.fenixedu.bennu.core.domain.User;
+import org.fenixedu.bennu.core.groups.Group;
 import org.fenixedu.bennu.core.security.Authenticate;
 import org.fenixedu.bennu.core.security.SkipCSRF;
 import org.fenixedu.bennu.spring.portal.SpringFunctionality;
@@ -63,8 +64,20 @@ public class GoogleCollaborationController {
     @RequestMapping(value = "/{group}/delete", method = RequestMethod.POST)
     public String deleteGroup(final @PathVariable CollaborationGroup group) {
         final User user = Authenticate.getUser();
-        if (group.getOwnersSet().stream().map(c -> c.getUser()).anyMatch(u -> u == user)) {
+        if (group.getOwnersSet().stream().map(c -> c.getUser()).anyMatch(u -> u == user)
+                || Group.managers().isMember(user)) {
             group.deleteGoogleClassroom();
+        }
+        return "redirect:/collaboration/google";
+    }
+
+
+    @SkipCSRF
+    @RequestMapping(value = "/{googleGroupId}/directDeleteClassroom", method = RequestMethod.POST)
+    public String deleteGroup(final @PathVariable String googleGroupId) {
+        final User user = Authenticate.getUser();
+        if (Group.managers().isMember(user)) {
+            Client.deleteCourse(googleGroupId);
         }
         return "redirect:/collaboration/google";
     }
@@ -76,6 +89,7 @@ public class GoogleCollaborationController {
             return "redirect:/collaboration/google";
         }
         model.addAttribute("user", user);
+
         final JsonArray courses = new JsonArray();
         final Collaborator collaborator = user.getCollaborator();
         if (collaborator != null && collaborator.getGoogleId() != null && !collaborator.getGoogleId().isEmpty()) {
@@ -83,6 +97,7 @@ public class GoogleCollaborationController {
             Client.listCourses(null, collaborator.getGoogleId(), c -> addCourseInfo(courses, c));
         }
         model.addAttribute("courses", courses);
+
         return "collaboration/google/debug";
     }
 
