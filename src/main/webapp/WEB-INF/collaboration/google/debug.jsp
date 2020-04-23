@@ -352,7 +352,9 @@
                     <td>
                         <%= course.get("name").getAsString() %>
                         <br/>
-                        <%= course.get("section").getAsString() %>
+                        <% if (course.get("section") != null && !course.get("section").isJsonNull()) { %>
+                            <%= course.get("section").getAsString() %>
+                        <% } %>
                     </td>
                     <td><%= course.get("ownerId").getAsString() %></td>
                     <td><%= course.get("courseState").getAsString() %></td>
@@ -382,7 +384,7 @@
                         </ul>
                         <h5>Students</h5>
                         <p>
-                            <%= course.get("teachers").getAsJsonArray().size() %>
+                            <%= course.get("students").getAsJsonArray().size() %>
                         </p>
                     </td>
                 </tr>
