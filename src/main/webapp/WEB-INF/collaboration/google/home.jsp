@@ -1,3 +1,5 @@
+<%@ page import="org.fenixedu.bennu.core.groups.Group" %>
+<%@ page import="org.fenixedu.bennu.core.security.Authenticate" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
@@ -150,3 +152,28 @@
         </c:forEach>
     </tbody>
 </table>
+
+<% if (Group.managers().isMember(Authenticate.getUser())) { %>
+<h3>
+    <spring:message code="title.collaboration.google.debug" text="Debug Google Classroom"/>
+</h3>
+<br/>
+<form class="form-horizontal" action="" method="POST">
+    ${csrf.field()}
+    <div class="form-group">
+        <div class="col-sm-1">
+        </div>
+        <div class="col-sm-8">
+            <input type="text" name="username" required="required" placeholder="Username"
+                   class="form-control ui-autocomplete-input"/>
+        </div>
+        <div class="col-sm-3">
+            <button id="submitRequest" class="btn btn-primary">
+                Selecionar
+            </button>
+        </div>
+    </div>
+    <div class="form-group">
+    </div>
+</form>
+<% } %>

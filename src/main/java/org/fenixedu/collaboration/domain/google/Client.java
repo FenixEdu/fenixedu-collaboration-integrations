@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Client {
 
@@ -71,9 +72,13 @@ public class Client {
         return accessToken;
     }
 
-    private static void get(final String url, final Consumer<JsonObject> consumer, final String objectArrayField,
-                     final String nextPageToken) {
+    private static void get(final String url, final Function<HttpRequest, HttpRequest> requestBuilder,
+                            final Consumer<JsonObject> consumer, final String objectArrayField,
+                            final String nextPageToken) {
         HttpRequest request = Unirest.get(url).header("Authorization", "Bearer " + getAccessToken());
+        if (requestBuilder != null) {
+            request = requestBuilder.apply(request);
+        }
         if (nextPageToken != null) {
             request = request.queryString("pageToken", nextPageToken);
         }
@@ -90,7 +95,7 @@ public class Client {
         }
         final JsonElement nextPageTokenElement = result.get("nextPageToken");
         if (nextPageTokenElement != null && !nextPageTokenElement.isJsonNull()) {
-            get(url, consumer, objectArrayField, nextPageTokenElement.getAsString());
+            get(url, null, consumer, objectArrayField, nextPageTokenElement.getAsString());
         }
     }
 
@@ -127,7 +132,7 @@ public class Client {
 
     public static void listUsers(final Consumer<JsonObject> courseConsumer) {
         get("https://www.googleapis.com/admin/directory/v1/users?customer=" + CollaborationIntegrationsConfiguration.getConfiguration().googleOrganizationId(),
-                courseConsumer, "users", null);
+                null, courseConsumer, "users", null);
     }
 
     public static JsonObject classroomProfile(final String email) {
@@ -135,11 +140,24 @@ public class Client {
     }
 
     public static void listCourses(final Consumer<JsonObject> courseConsumer) {
-        get("https://classroom.googleapis.com/v1/courses", courseConsumer, "courses", null);
+        get("https://classroom.googleapis.com/v1/courses", null, courseConsumer, "courses", null);
+    }
+
+    public static void listCourses(final String teacherId, final String studentId, final Consumer<JsonObject> courseConsumer) {
+        final Function<HttpRequest, HttpRequest> paramBuilder = r -> {
+            if (teacherId != null && !teacherId.isEmpty()) {
+                return r.queryString("teacherId", teacherId);
+            }
+            if (studentId != null && !studentId.isEmpty()) {
+                return r.queryString("studentId", studentId);
+            }
+            return r;
+        };
+        get("https://classroom.googleapis.com/v1/courses", paramBuilder, courseConsumer, "courses", null);
     }
 
     public static void listStudents(final String courseId, final Consumer<JsonObject> courseConsumer) {
-        get("https://classroom.googleapis.com/v1/courses/" + courseId + "/students", courseConsumer, "students", null);
+        get("https://classroom.googleapis.com/v1/courses/" + courseId + "/students", null, courseConsumer, "students", null);
     }
 
     public static JsonObject listStudents(final String courseId) {
@@ -151,7 +169,7 @@ public class Client {
     }
 
     public static void listTeachers(final String courseId, final Consumer<JsonObject> courseConsumer) {
-        get("https://classroom.googleapis.com/v1/courses/" + courseId + "/teachers", courseConsumer, "teachers", null);
+        get("https://classroom.googleapis.com/v1/courses/" + courseId + "/teachers", null, courseConsumer, "teachers", null);
     }
 
     public static JsonObject listTeachers(final String courseId) {
@@ -187,11 +205,11 @@ public class Client {
     }
 
     public static void removeTeacher(String courseId, String userId) {
-        delete("https://classroom.googleapis.com/v1/courses/" + courseId + "/teachers" + userId);
+        delete("https://classroom.googleapis.com/v1/courses/" + courseId + "/teachers/" + userId);
     }
 
     public static void removeStudent(String courseId, String userId) {
-        delete("https://classroom.googleapis.com/v1/courses/" + courseId + "/students" + userId);
+        delete("https://classroom.googleapis.com/v1/courses/" + courseId + "/students/" + userId);
     }
 
     public static void deleteCourse(final String courseId) {
