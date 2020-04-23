@@ -157,7 +157,7 @@
     <div class="info-div">
         <div class="row">
             <div class="col-md-2">
-                <img class="img-p-circle" alt="" src="/fenix/user/photo/${user.username}">
+                <img class="img-p-circle" alt="" src="<%= request.getContextPath()%>/user/photo/${user.username}">
             </div>
             <div class="col-md-4">
                 <dl>
