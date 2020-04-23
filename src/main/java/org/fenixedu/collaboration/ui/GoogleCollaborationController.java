@@ -91,7 +91,7 @@ public class GoogleCollaborationController {
         final JsonObject teachers = Client.listTeachers(course.get("id").getAsString());
         course.add("teachers", teachers.get("teachers").getAsJsonArray());
         final JsonObject students = Client.listStudents(course.get("id").getAsString());
-        course.add("students", teachers.get("students").getAsJsonArray());
+        course.add("students", students.get("students").getAsJsonArray());
     }
 
 }
