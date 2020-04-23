@@ -23,6 +23,10 @@ public class Client {
     private static String accessToken = null;
     private static LocalDateTime accessTokenValidUnit = LocalDateTime.now().minusSeconds(1);
 
+    public static void clearAccessToken() {
+        accessTokenValidUnit = LocalDateTime.now().minusSeconds(1);
+    }
+
     private static String jwt() {
         final JsonObject claim = new JsonObject();
         claim.addProperty("iss", CollaborationIntegrationsConfiguration.getConfiguration().googleServiceClientISS());
@@ -130,6 +134,16 @@ public class Client {
         }
     }
 
+    public static void listGroups(final Consumer<JsonObject> courseConsumer) {
+        get("https://www.googleapis.com/admin/directory/v1/groups?customer=" + CollaborationIntegrationsConfiguration.getConfiguration().googleOrganizationId(),
+                null, courseConsumer, "groups", null);
+    }
+
+    public static void listGroupMembers(final String groupId, final Consumer<JsonObject> courseConsumer) {
+        get("https://www.googleapis.com/admin/directory/v1/groups/" + groupId + "/members",
+                null, courseConsumer, "members", null);
+    }
+
     public static void listUsers(final Consumer<JsonObject> courseConsumer) {
         get("https://www.googleapis.com/admin/directory/v1/users?customer=" + CollaborationIntegrationsConfiguration.getConfiguration().googleOrganizationId(),
                 null, courseConsumer, "users", null);
@@ -214,6 +228,21 @@ public class Client {
 
     public static void deleteCourse(final String courseId) {
         delete("https://classroom.googleapis.com/v1/courses/" + courseId);
+    }
+
+    public static void removeGroupMember(final String groupId, final String memberId) {
+        delete("https://www.googleapis.com/admin/directory/v1/groups/" + groupId + "/members/" + memberId);
+    }
+
+    public static String readTeacherGroupId() {
+        final String[] result = new String[1];
+        Client.listGroups(g -> {
+            final String name = g.get("name").getAsString();
+            if ("Classroom Teachers".equals(name)) {
+                result[0] = g.get("id").getAsString();
+            }
+        });
+        return result[0];
     }
 
 }

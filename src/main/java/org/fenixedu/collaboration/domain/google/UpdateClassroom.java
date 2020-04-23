@@ -22,6 +22,12 @@ public class UpdateClassroom {
         final Consumer<String> removeMember = id -> Client.removeStudent(group.getGoogleId(), id);
         Utils.updateMembers(group.getGoogleId(), listMembers, "students", group::setGoogleMemberCount,
                 group.getMembersSet(), addMember, removeMember, c -> c.getGoogleId(), "userId");
+
+        final String teacherGroupId = Client.readTeacherGroupId();
+        group.getOwnersSet().stream()
+                .map(c -> c.getGoogleId())
+                .filter(id -> id != null && !id.isEmpty())
+                .forEach(id -> Client.removeGroupMember(teacherGroupId, id));
     }
 
 }

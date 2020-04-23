@@ -3,7 +3,6 @@ package org.fenixedu.collaboration.task;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.scheduler.CronTask;
 import org.fenixedu.bennu.scheduler.annotation.Task;
-import org.fenixedu.bennu.scheduler.custom.CustomTask;
 import org.fenixedu.collaboration.domain.Collaborator;
 import org.fenixedu.collaboration.domain.google.Client;
 
@@ -24,6 +23,13 @@ public class UpdateGoogleUsersTask extends CronTask {
                 Collaborator.setUserGoogleId(user, id);
             }
         });
+        taskLog("Clearing teachers");
+        final String teacherGroupId = Client.readTeacherGroupId();
+        if (teacherGroupId != null) {
+            Client.listGroupMembers(teacherGroupId, m -> {
+                Client.removeGroupMember(teacherGroupId, m.get("id").getAsString());
+            });
+        }
     }
 
 }
