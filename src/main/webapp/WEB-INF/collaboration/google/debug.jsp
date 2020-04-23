@@ -119,6 +119,8 @@
     -->
 </style>
 
+<spring:message var="confirmDelete" code="label.collaboration.group.confirmDelete" text="Are you sure you want to delete the group" />
+
 <h2>
     <spring:message code="title.collaboration" text="Collaboration Tools"/>
 </h2>
@@ -357,8 +359,8 @@
                     <td>
                         <form class="form-horizontal" method="POST" action="<%= contextPath %>/collaboration/google/<%= course.get("id").getAsString() %>/directDeleteClassroom">
                             ${csrf.field()}
-                            <button id="submitRequest" class="btn btn-primary">
-                                <spring:message code="label.create" text="Create" />
+                                <button id="submitRequest" class="btn btn-danger" onclick="return confirm('${confirmDelete}');">
+                                <spring:message code="label.delete" text="Delete" />
                             </button>
                         </form>
                     </td>
