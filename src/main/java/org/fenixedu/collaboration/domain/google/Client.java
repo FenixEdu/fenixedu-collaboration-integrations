@@ -134,14 +134,14 @@ public class Client {
         }
     }
 
-    public static void listGroups(final Consumer<JsonObject> courseConsumer) {
-        get("https://www.googleapis.com/admin/directory/v1/groups?customer=" + CollaborationIntegrationsConfiguration.getConfiguration().googleOrganizationId(),
-                null, courseConsumer, "groups", null);
-    }
-
     public static void listGroupMembers(final String groupId, final Consumer<JsonObject> courseConsumer) {
         get("https://www.googleapis.com/admin/directory/v1/groups/" + groupId + "/members",
                 null, courseConsumer, "members", null);
+    }
+
+    public static void listGroups(final Consumer<JsonObject> courseConsumer) {
+        get("https://www.googleapis.com/admin/directory/v1/groups?customer=" + CollaborationIntegrationsConfiguration.getConfiguration().googleOrganizationId(),
+                null, courseConsumer, "groups", null);
     }
 
     public static void listUsers(final Consumer<JsonObject> courseConsumer) {
