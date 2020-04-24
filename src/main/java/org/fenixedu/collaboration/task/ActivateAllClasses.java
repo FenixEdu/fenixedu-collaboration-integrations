@@ -7,9 +7,13 @@ import org.fenixedu.bennu.scheduler.CronTask;
 import org.fenixedu.bennu.scheduler.annotation.Task;
 import org.fenixedu.collaboration.domain.CollaborationGroup;
 import org.fenixedu.collaboration.domain.azure.UpdateTeam;
+import org.fenixedu.collaboration.domain.google.Client;
 import org.fenixedu.collaboration.domain.google.UpdateClassroom;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Task(readOnly = true, englishTitle = "Activate Azure Microsoft Teams")
 public class ActivateAllClasses extends CronTask {
@@ -29,7 +33,27 @@ public class ActivateAllClasses extends CronTask {
                 .flatMap(c -> c.getOwnedGroupSet().stream())
                 .filter(group -> group.getAzureUrl() == null || group.getAzureUrl().isEmpty())
                 .forEach(group -> processTx(group));
+        cleanUpDeletedGoogleClassrooms();
         taskLog("Done");
+    }
+
+    private void cleanUpDeletedGoogleClassrooms() {
+        final Set<String> existingGoogleGroups = new HashSet<>();
+        Client.listCourses(course -> {
+            final String id = course.get("id").getAsString();
+            existingGoogleGroups.add(id);
+        });
+
+        FenixFramework.atomic(() -> {
+            ExecutionSemester.readActualExecutionSemester().getAssociatedExecutionCoursesSet().stream()
+                    .map(ec -> ec.getCollaborationGroup())
+                    .filter(cg -> cg != null && cg.getGoogleId() != null && !cg.getGoogleId().isEmpty())
+                    .filter(cg -> !existingGoogleGroups.contains(cg.getGoogleId()))
+                    .forEach(cg -> {
+                        cg.setGoogleUrl(null);
+                        cg.setGoogleId(null);
+                    });
+        });
     }
 
     private void processTx(final CollaborationGroup group) {
