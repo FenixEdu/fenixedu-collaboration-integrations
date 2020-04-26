@@ -45,6 +45,15 @@ public class CollaborationIntegrationsConfiguration {
 
         @ConfigurationProperty(key = "collaboration.limesurvey.password", defaultValue = "pass")
         public String limeSurveyPassword();
+
+        @ConfigurationProperty(key = "collaboration.discourse.url", defaultValue = "https://localhost")
+        public String discourseUrl();
+
+        @ConfigurationProperty(key = "collaboration.discourse.apiUsername", defaultValue = "system")
+        public String discourseApiUsername();
+
+        @ConfigurationProperty(key = "collaboration.discourse.apiKey", defaultValue = "123key")
+        public String discourseApiKey();
     }
 
     public static ConfigurationProperties getConfiguration() {
