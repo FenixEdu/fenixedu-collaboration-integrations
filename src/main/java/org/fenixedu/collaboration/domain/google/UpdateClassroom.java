@@ -19,7 +19,12 @@ public class UpdateClassroom {
 
         final Function<String, JsonObject> listMembers = Client::listStudents;
         final Consumer<Collaborator> addMember = c -> Client.addStudent(group.getGoogleId(), group.getGoogleEnrollmentCode(), c.getGoogleId());
-        final Consumer<String> removeMember = id -> Client.removeStudent(group.getGoogleId(), id);
+        final Consumer<String> removeMember = id -> {
+            try {
+                Client.removeStudent(group.getGoogleId(), id);
+            } catch (final Throwable t) {
+            }
+        };
         Utils.updateMembers(group.getGoogleId(), listMembers, "students", group::setGoogleMemberCount,
                 group.getMembersSet(), addMember, removeMember, c -> c.getGoogleId(), "userId");
 
@@ -27,7 +32,12 @@ public class UpdateClassroom {
         group.getOwnersSet().stream()
                 .map(c -> c.getGoogleId())
                 .filter(id -> id != null && !id.isEmpty())
-                .forEach(id -> Client.removeGroupMember(teacherGroupId, id));
+                .forEach(id -> {
+                    try {
+                        Client.removeGroupMember(teacherGroupId, id);
+                    } catch (final Throwable t) {
+                    }
+                });
     }
 
 }
