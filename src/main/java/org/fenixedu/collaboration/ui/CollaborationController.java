@@ -20,6 +20,7 @@ package org.fenixedu.collaboration.ui;
 
 import org.fenixedu.academic.domain.ExecutionCourse;
 import org.fenixedu.academic.domain.ExecutionSemester;
+import org.fenixedu.academic.domain.ExecutionYear;
 import org.fenixedu.academic.domain.Person;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.core.groups.Group;
@@ -53,7 +54,7 @@ public class CollaborationController {
 
             final Person person = user.getPerson();
             if (person != null) {
-                final Set<ExecutionCourse> courses = person.getProfessorships(ExecutionSemester.readActualExecutionSemester()).stream()
+                final Set<ExecutionCourse> courses = person.getProfessorships(ExecutionYear.readCurrentExecutionYear()).stream()
                         .map(p -> p.getExecutionCourse())
                         .filter(ec -> ec.getCollaborationGroup() == null || allowCreatePredicate.test(ec.getCollaborationGroup()))
                         .collect(Collectors.toSet());
