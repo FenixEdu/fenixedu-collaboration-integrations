@@ -13,7 +13,12 @@ public class UpdateClassroom {
     public static void updateMembers(final CollaborationGroup group) {
         final Function<String, JsonObject> listOwners = Client::listTeachers;
         final Consumer<Collaborator> addOwner = c -> Client.addTeacher(group.getGoogleId(), c.getGoogleId());
-        final Consumer<String> removeOwner = id -> Client.removeTeacher(group.getGoogleId(), id);
+        final Consumer<String> removeOwner = id -> {
+            try {
+                Client.removeTeacher(group.getGoogleId(), id);
+            } catch (final Throwable t) {
+            }
+        };
         Utils.updateMembers(group.getGoogleId(), listOwners, "teachers", group::setGoogleOwnerCount,
                 group.getOwnersSet(), addOwner, removeOwner, c -> c.getGoogleId(), "userId");
 
