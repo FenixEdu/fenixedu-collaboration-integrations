@@ -374,11 +374,11 @@
                             <% for (final JsonElement teacherE : course.get("teachers").getAsJsonArray()) { %>
                             <% final JsonObject teacher = teacherE.getAsJsonObject(); %>
                             <% final JsonObject profile = teacher.get("profile").getAsJsonObject(); %>
-                            <% final JsonObject name = profile.get("name").getAsJsonObject(); %>
+                            <% final JsonObject name = profile == null ? null : profile.get("name").getAsJsonObject(); %>
                                 <li>
                                     <%= teacher.get("userId").getAsString() %>
                                     <%= name.get("fullName").getAsString() %>
-                                    <%= profile.get("emailAddress").getAsString() %>
+                                    <%= profile == null ? "null" : profile.get("emailAddress").getAsString() %>
                                 </li>
                             <% } %>
                         </ul>
