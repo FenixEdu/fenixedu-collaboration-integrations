@@ -46,6 +46,7 @@ public class LimeSurveyController {
         final User user = Authenticate.getUser();
         model.addAttribute("user", user);
 
+/*
         final Person person = user.getPerson();
         if (person != null) {
             final Set<ExecutionCourse> courses = person.getProfessorships(ExecutionSemester.readActualExecutionSemester()).stream()
@@ -53,6 +54,7 @@ public class LimeSurveyController {
                 .collect(Collectors.toSet());
             model.addAttribute("ownedCourses", courses);
         }
+*/
 
         return "collaboration/limesurvey/home";
     }
