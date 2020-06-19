@@ -130,7 +130,7 @@ public class Client {
                 .header("Authorization", "Bearer " + getAccessToken())
                 .asString();
         if (get.getStatus() != 200) {
-            throw new Error("url " + get.getStatus() + " " + get.getBody());
+            throw new Error(url + " " + get.getStatus() + " " + get.getBody());
         }
     }
 
