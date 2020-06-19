@@ -96,7 +96,7 @@ public class CollaborationGroup extends CollaborationGroup_Base {
         body.addProperty("displayName", executionCourse.getName());
         body.addProperty("externalName", executionCourse.getName());
         body.addProperty("externalSource", "FenixEdu@tecnico.ulisboa.pt");
-        body.addProperty("mailNickname", Client.clean(group.getName()));
+        body.addProperty("mailNickname", Client.clean(group.getName() + executionCourse.getExternalId()));
         final JsonObject result = Client.createClass(body);
         final JsonElement idElement = result.get("id");
         if (idElement == null || idElement.isJsonNull()) {
@@ -179,13 +179,19 @@ public class CollaborationGroup extends CollaborationGroup_Base {
 
     @Atomic
     public void deleteGoogleClassroom() {
-        org.fenixedu.collaboration.domain.google.Client.deleteCourse(getGoogleId());
+        try {
+            org.fenixedu.collaboration.domain.google.Client.deleteCourse(getGoogleId());
+        } catch (final Error error) {
+            if (error.getMessage().indexOf(" 404 ") < 0) {
+                throw error;
+            }
+        }
         setGoogleId(null);
         setGoogleUrl(null);
         setGoogleEnrollmentCode(null);
         setGoogleMemberCount(0);
         setGoogleOwnerCount(0);
-        if (getAzureId() == null && getAzureId().isEmpty()) {
+        if (getAzureId() == null || getAzureId().isEmpty()) {
             delete();
         }
     }
