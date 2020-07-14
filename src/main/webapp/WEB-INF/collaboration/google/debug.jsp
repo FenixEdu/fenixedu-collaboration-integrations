@@ -378,7 +378,8 @@
                                 <li>
                                     <%= teacher.get("userId").getAsString() %>
                                     <%= name.get("fullName").getAsString() %>
-                                    <%= profile == null ? "null" : profile.get("emailAddress").getAsString() %>
+                                    <%= profile == null || profile.get("emailAddress") == null || profile.get("emailAddress").isJsonNull()
+                                            ? "null" : profile.get("emailAddress").getAsString() %>
                                 </li>
                             <% } %>
                         </ul>
