@@ -12,7 +12,9 @@ import org.fenixedu.collaboration.domain.google.UpdateClassroom;
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Task(readOnly = true, englishTitle = "Activate Azure Microsoft Teams")
@@ -38,22 +40,37 @@ public class ActivateAllClasses extends CronTask {
     }
 
     private void cleanUpDeletedGoogleClassrooms() {
-        final Set<String> existingGoogleGroups = new HashSet<>();
+        final Map<String, String> existingGoogleGroups = new HashMap<>();
         Client.listCourses(course -> {
             final String id = course.get("id").getAsString();
-            existingGoogleGroups.add(id);
+            final String name = course.get("name").getAsString();
+            final String state = course.get("courseState").getAsString();
+            //           taskLog("Found remote class: %s %s %s%n", id, state, name);
+            existingGoogleGroups.put(id, state);
         });
 
-        FenixFramework.atomic(() -> {
-            ExecutionSemester.readActualExecutionSemester().getAssociatedExecutionCoursesSet().stream()
-                    .map(ec -> ec.getCollaborationGroup())
-                    .filter(cg -> cg != null && cg.getGoogleId() != null && !cg.getGoogleId().isEmpty())
-                    .filter(cg -> !existingGoogleGroups.contains(cg.getGoogleId()))
-                    .forEach(cg -> {
-                        cg.setGoogleUrl(null);
-                        cg.setGoogleId(null);
-                    });
+        existingGoogleGroups.entrySet().forEach(e -> {
+            final String id = e.getKey();
+            final String state = e.getValue();
+            if ("DECLINED".equals(state)) {
+                try {
+                    Client.deleteCourse(id);
+                    existingGoogleGroups.remove(id);
+                } catch (final Error error) {
+                    taskLog("Failed to delete declined course: %s%n", id);
+                }
+            }
         });
+
+        ExecutionSemester.readActualExecutionSemester().getAssociatedExecutionCoursesSet().stream()
+                .map(ec -> ec.getCollaborationGroup())
+                .filter(cg -> cg != null && cg.getGoogleId() != null && !cg.getGoogleId().isEmpty())
+                .filter(cg -> !existingGoogleGroups.containsKey(cg.getGoogleId()))
+                .forEach(cg -> {
+                    taskLog("Clearing deleted google group: %s %s%n", cg.getGoogleId(), cg.getName());
+                    cg.setGoogleUrl(null);
+                    cg.setGoogleId(null);
+                });
     }
 
     private void processTx(final CollaborationGroup group) {
